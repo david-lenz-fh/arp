@@ -13,7 +13,7 @@ namespace MRP.Data
 
             return new PostgresDB(dataSource);
         }
-        public async Task<int> ChangeData(string prepared_sql, Dictionary<string, object> values)
+        public async Task<int> SQLWithoutReturns(string prepared_sql, Dictionary<string, object> values)
         {
             await using var sql = _dataSource.CreateCommand(prepared_sql);
             foreach(var kv in values) {
@@ -21,7 +21,7 @@ namespace MRP.Data
             }
             return await sql.ExecuteNonQueryAsync();
         }
-        public async Task<NpgsqlDataReader> ReadData(string prepared_sql, Dictionary<string, object> values)
+        public async Task<NpgsqlDataReader> SQLWithReturns(string prepared_sql, Dictionary<string, object> values)
         {
             await using var sql = _dataSource.CreateCommand(prepared_sql);
             foreach (var kv in values)

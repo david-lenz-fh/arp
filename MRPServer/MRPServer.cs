@@ -1,16 +1,20 @@
-﻿using System.Net;
+﻿using API;
+using BusinessLogic;
+using System.Net;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace mrp
 {
-    public class MRPServer
+    internal class MRPServer
     {
+        private readonly IAPI api;
         private readonly HttpListener listener = new HttpListener();
         private readonly Dictionary<(string,string), Action<HttpListenerContext>> routes;
         private readonly string url;
         private int retry = 3;
 
-        public MRPServer()
+        internal MRPServer(IAPI api)
         {       
             url = "http://localhost:8080/";
             listener.Prefixes.Add(url);
@@ -18,7 +22,7 @@ namespace mrp
             routes = new Dictionary<(string path, string httpMethod), Action<HttpListenerContext>>
             {
                 [("/users/register", "POST")] = ctx => WriteResponse(ctx, "Meine Anime Rating Platform Startseite"),
-                [("/users/login", "POST")] = ctx => WriteResponse(ctx, "Test!"),
+                [("/users/login", "POST")] = ctx => api.UserHandler.Login(ctx),
                 [("/users/{userId}/profile","GET")] = ctx => WriteResponse(ctx, "Test!"),
                 [("/users/{userId}/profile", "PUT")] = ctx => WriteResponse(ctx, "Test!"),
                 [("/users/{userdId}/ratings","GET")] = ctx => WriteResponse(ctx, "Test!"),
@@ -53,7 +57,7 @@ namespace mrp
             }
             catch (Exception e)
             {
-                Console.WriteLine("Exception: ", e);
+                Console.WriteLine("Exception: {0}", e);
             }
             finally
             {
@@ -85,6 +89,7 @@ namespace mrp
             }
         }
 
+        //SRP (keine Handler von Requests in der selben Klasse wie Server starten)
         private void WriteResponse(HttpListenerContext ctx, string text)
         {
             byte[] buffer = Encoding.UTF8.GetBytes(text);
@@ -92,6 +97,13 @@ namespace mrp
             ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
             ctx.Response.OutputStream.Close();
         }
-
+        private void Error404(HttpListenerContext ctx)
+        {
+            byte[] buffer = Encoding.UTF8.GetBytes("Not Found");
+            ctx.Response.ContentLength64 = buffer.Length;
+            ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
+            ctx.Response.OutputStream.Close();
+            ctx.Response.StatusCode = 404;
+        }
     }
 }

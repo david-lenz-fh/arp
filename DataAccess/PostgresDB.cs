@@ -1,7 +1,7 @@
 ﻿using Npgsql;
-namespace MRP.Data
+namespace DataAccess
 {
-    internal class PostgresDB
+    public class PostgresDB
     {
         private static string connectionString = "Host=localhost;Port=5432;Username=postgres;Password=1234;Database=mrp_db;";
         private NpgsqlDataSource _dataSource;
@@ -13,15 +13,23 @@ namespace MRP.Data
 
             return new PostgresDB(dataSource);
         }
-        public async Task<int> SQLWithoutReturns(string prepared_sql, Dictionary<string, object> values)
+        public async Task<int> SQLWithoutReturns(string prepared_sql, Dictionary<string, object?> values)
         {
-            await using var sql = _dataSource.CreateCommand(prepared_sql);
-            foreach(var kv in values) {
-                sql.Parameters.AddWithValue(kv.Key, kv.Value ?? DBNull.Value);
+            try
+            {
+                await using var sql = _dataSource.CreateCommand(prepared_sql);
+                foreach (var kv in values)
+                {
+                    sql.Parameters.AddWithValue(kv.Key, kv.Value ?? DBNull.Value);
+                }
+                return await sql.ExecuteNonQueryAsync();
             }
-            return await sql.ExecuteNonQueryAsync();
+            catch(Exception)
+            {
+                return -1;
+            }
         }
-        public async Task<NpgsqlDataReader> SQLWithReturns(string prepared_sql, Dictionary<string, object> values)
+        public async Task<NpgsqlDataReader> SQLWithReturns(string prepared_sql, Dictionary<string, object?> values)
         {
             await using var sql = _dataSource.CreateCommand(prepared_sql);
             foreach (var kv in values)

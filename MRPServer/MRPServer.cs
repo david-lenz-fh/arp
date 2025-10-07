@@ -21,7 +21,7 @@ namespace mrp
 
             routes = new Dictionary<(string path, string httpMethod), Action<HttpListenerContext>>
             {
-                [("/users/register", "POST")] = ctx => WriteResponse(ctx, "Meine Anime Rating Platform Startseite"),
+                [("/users/register", "POST")] = ctx => api.UserHandler.GetUser(ctx),
                 [("/users/login", "POST")] = ctx => api.UserHandler.Login(ctx),
                 [("/users/{userId}/profile","GET")] = ctx => WriteResponse(ctx, "Test!"),
                 [("/users/{userId}/profile", "PUT")] = ctx => WriteResponse(ctx, "Test!"),

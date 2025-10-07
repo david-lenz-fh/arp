@@ -1,55 +1,53 @@
-﻿using DataAccess;
+﻿using BusinessLogic.Models;
+using DataAccess;
+using DataAccess.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
-using DataAccess.Entities;
-using BusinessLogic.Models;
 
 namespace BusinessLogic
 {
     public class UserService:IUserService
     {
         private IDAL _dal;
-        private readonly byte[] secretPrivateKey = Encoding.UTF8.GetBytes("Tokendergeheimist");
+        
+        private readonly byte[] secretPrivateKey;
+
         public UserService(IDAL dal)
         {
             _dal = dal;
-        }
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                secretPrivateKey=sha256.ComputeHash(Encoding.UTF8.GetBytes("MeinGeheimToken"));
+            }
+}
         public async Task<Token?> Login(User credentials)
         {
-            string hashed=HashPassword(credentials.Password);
+            string hashed=Hash(credentials.Password);
             UserEntity? loginUser=await _dal.UserRepo.FindUserByName(credentials.Username);
             if (loginUser == null || hashed != loginUser.Password)
             {
                 return null;
             }
-            return new Token(AES.Encrypt(credentials.Username, secretPrivateKey));
-        }
-        public async Task<Token?> Register(User credentials)
-        {
-            string hashed = HashPassword(credentials.Password);
-            bool added = await _dal.UserRepo.AddUser(new UserEntity(credentials.Username, hashed));
-            if (added)
-            {
-                return new Token(AES.Encrypt(credentials.Username, secretPrivateKey));
-            }
-            return null;
+            string toEncrypt = GetValidTimeStamp() + ":" + credentials.Username;
+            return new Token(AES.Encrypt(toEncrypt, secretPrivateKey));
         }
         public async Task<User?> GetUserByToken(string token)
         {
-            string plaintext=AES.Decrypt(token, secretPrivateKey);
+            string plaintext = AES.Decrypt(token, secretPrivateKey);
             string[] tokenVariables = plaintext.Split(":");
-            if (tokenVariables.Length != 2 && tokenVariables[0]!=null && tokenVariables[1]!=null)
+            if (tokenVariables.Length != 2 || tokenVariables[0] == null || tokenVariables[1] == null )
             {
                 return null;
             }
-            long expireTSTMP=0;
+            long expireTSTMP = 0;
             try
             {
-                expireTSTMP = long.Parse(tokenVariables[1]);
+                expireTSTMP = long.Parse(tokenVariables[0]);
             }
             catch (Exception)
             {
@@ -59,16 +57,31 @@ namespace BusinessLogic
             {
                 return null;
             }
-            
-            UserEntity? found = await _dal.UserRepo.FindUserByName(tokenVariables[0]);
-            if(found == null)
+
+            UserEntity? found = await _dal.UserRepo.FindUserByName(tokenVariables[1]);
+            if (found == null)
             {
                 return null;
             }
             return new User(found.Username, found.Password);
-            
+
         }
-        private static string HashPassword(string rawData)
+        public async Task<Token?> Register(User credentials)
+        {
+            string hashed = Hash(credentials.Password);
+            bool added = await _dal.UserRepo.AddUser(new UserEntity(credentials.Username, hashed));
+            if (added)
+            {
+                return new Token(AES.Encrypt(credentials.Username, secretPrivateKey));
+            }
+            return null;
+        }
+        private static long GetValidTimeStamp()
+        {
+            return DateTime.Now.Add(TimeSpan.FromSeconds(7200)).Ticks;
+        }
+        
+        private static string Hash(string rawData)
         {
             using (SHA256 sha256Hash = SHA256.Create())
             {

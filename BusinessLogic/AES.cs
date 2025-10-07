@@ -31,7 +31,7 @@ namespace BusinessLogic
         }
         public static string Decrypt(string tokenstring, byte[] key)
         {
-            byte[] token=Encoding.Unicode.GetBytes(tokenstring);
+            byte[] token= Convert.FromBase64String(tokenstring);
             if (token.Length < 16) throw new ArgumentException("Token too short");
 
             byte[] iv = token.Take(16).ToArray();

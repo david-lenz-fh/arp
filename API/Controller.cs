@@ -17,15 +17,16 @@ namespace API
             _bl = bl; 
         }
         
-        public async static Task WriteJSONResponseAsync<T>(HttpListenerContext ctx, T toJSON)
+        public static void WriteJson<T>(HttpListenerContext ctx, T toJSON)
         {
             string json = JsonSerializer.Serialize(toJSON);
+            
+            ctx.Response.ContentEncoding = System.Text.Encoding.UTF8;
+            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(json);
 
             ctx.Response.ContentType = "application/json";
-            ctx.Response.ContentEncoding = System.Text.Encoding.UTF8;
-
-            using var writer = new StreamWriter(ctx.Response.OutputStream);
-            await writer.WriteAsync(json);
+            ctx.Response.ContentLength64 = buffer.Length; // wichtig
+            ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
             ctx.Response.Close();
         }
 

@@ -29,7 +29,23 @@ namespace API
                 SendEmptyStatus(ctx, 404);
                 return;
             }
-            await WriteJSONResponseAsync<Token>(ctx, token);
+            WriteJson<Token>(ctx, token);
+        }
+        public async Task GetUser(HttpListenerContext ctx)
+        {
+            var token = await ReadJSONRequestAsync<Token>(ctx);
+            if(token == null)
+            {
+                SendEmptyStatus(ctx, 400);
+                return;
+            }
+            User? added=await _bl.UserService.GetUserByToken(token.token);
+            if (added == null)
+            {
+                SendEmptyStatus(ctx, 400);
+                return;
+            }
+            WriteJson<User>(ctx, added);
         }
     }    
 }

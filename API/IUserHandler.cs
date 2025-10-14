@@ -10,6 +10,6 @@ namespace API
     public interface IUserHandler
     {
         public Task Login(HttpListenerContext ctx);
-        public Task GetUser(HttpListenerContext ctx);
+        public Task Register(HttpListenerContext ctx);
     }
 }

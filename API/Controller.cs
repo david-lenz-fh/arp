@@ -25,7 +25,7 @@ namespace API
             byte[] buffer = System.Text.Encoding.UTF8.GetBytes(json);
 
             ctx.Response.ContentType = "application/json";
-            ctx.Response.ContentLength64 = buffer.Length; // wichtig
+            ctx.Response.ContentLength64 = buffer.Length; 
             ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
             ctx.Response.Close();
         }
@@ -37,9 +37,10 @@ namespace API
 
             return JsonSerializer.Deserialize<T>(body);
         }
-        public static void SendEmptyStatus(HttpListenerContext ctx, int statusCode)
+        public static void SendEmptyStatus(HttpListenerContext ctx, int statusCode, string description)
         {
             ctx.Response.StatusCode = statusCode;
+            ctx.Response.StatusDescription = description;
             ctx.Response.Close();
 
         }

@@ -72,7 +72,8 @@ namespace BusinessLogic
             bool added = await _dal.UserRepo.AddUser(new UserEntity(credentials.Username, hashed));
             if (added)
             {
-                return new Token(AES.Encrypt(credentials.Username, secretPrivateKey));
+                string toEncrypt = GetValidTimeStamp() + ":" + credentials.Username;
+                return new Token(AES.Encrypt(toEncrypt, secretPrivateKey));
             }
             return null;
         }

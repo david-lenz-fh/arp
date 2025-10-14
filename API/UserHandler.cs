@@ -29,11 +29,27 @@ namespace API
                 SendEmptyStatus(ctx, 404,"Couldn't authenticate");
                 return;
             }
+            ctx.Response.StatusCode = 200;
+            ctx.Response.StatusDescription = "Login successfull";
             WriteJson<Token>(ctx, token);
         }
         public async Task Register(HttpListenerContext ctx)
         {
-                
+            var registrationData= await ReadJSONRequestAsync<User>(ctx);
+            if (registrationData == null)
+            {
+                SendEmptyStatus(ctx, 400, "No User Information");
+                return;
+            }
+            Token? token=await _bl.UserService.Register(registrationData);
+            if (token == null)
+            {
+                SendEmptyStatus(ctx, 404, "Error creating Account");
+                return;
+            }
+            ctx.Response.StatusCode = 201;
+            ctx.Response.StatusDescription = "User Registered";
+            WriteJson<Token>(ctx, token);
         }
         public async Task GetUser(HttpListenerContext ctx)
         {

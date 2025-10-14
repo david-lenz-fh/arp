@@ -29,7 +29,7 @@ namespace DataAccess
             }
             return re;
         }
-        public async Task<MediaEntity?> FindById(int id)
+        public async Task<MediaEntity?> FindMediaById(int id)
         {
             String sql = """
                 SELECT media.id, media.name, media.description, media.release_date, media.fsk, COALESCE(array_agg(genre.name), '{}') AS genre_ids, 
@@ -42,8 +42,11 @@ namespace DataAccess
                 GROUP BY media.id, media.name, media.description, media.release_date, media.fsk, media_type.name, media_type.id
                 """;
 
-
-            var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { ["media_id"] = id });
+            var sqlParams = new Dictionary<string, object?>
+            {
+                ["media_id"] = id,
+            };
+            var reader = await _postgres.SQLWithReturns(sql, sqlParams);
             if (await reader.ReadAsync())
             {
                 return new MediaEntity(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), 
@@ -52,25 +55,39 @@ namespace DataAccess
             }
             return null;
         }
-        public async Task<List<string>> GetGenres()
+        public async Task<GenreEntity?> FindGenreById(int id)
         {
-            var re=new List<string>();
-            String sql = "SELECT name FROM genre";
+            String sql = "SELECT name FROM genre WHERE id=@id";
+            var sqlParams = new Dictionary<string, object?>
+            {
+                ["id"] = id,
+            };
+            var reader = await _postgres.SQLWithReturns(sql, sqlParams);
+            if (await reader.ReadAsync())
+            {
+                return new GenreEntity(reader.GetInt32(0), reader.GetString(1));
+            }
+            return null;
+        }
+        public async Task<List<GenreEntity>> GetGenres()
+        {
+            var re=new List<GenreEntity>();
+            String sql = "SELECT id, name FROM genre";
             var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { });
             while (await reader.ReadAsync())
             {
-                re.Add(reader.GetString(0));
+                re.Add(new GenreEntity(reader.GetInt32(0), reader.GetString(1)));
             }
             return re;
         }
-        public async Task<List<string>> GetMediaTypes()
+        public async Task<List<MediaTypeEntity>> GetMediaTypes()
         {
-            var re = new List<string>();
+            var re = new List<MediaTypeEntity>();
             String sql = "SELECT name FROM media_type";
             var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { });
             while (await reader.ReadAsync())
             {
-                re.Add(reader.GetString(0));
+                re.Add(new MediaTypeEntity(reader.GetInt32(0), reader.GetString(1)));
             }
             return re;
         }

@@ -13,7 +13,7 @@ namespace DataAccess
         public async Task<UserEntity?> FindUserByName(string username)
         {
             string sql = """
-            SELECT username, password 
+            SELECT username, password, email, favorite_genre_id 
             FROM mrp_user WHERE username=@username
             """;
             var sqlParams = new Dictionary<string, object?>
@@ -23,7 +23,7 @@ namespace DataAccess
             var reader = await _postgres.SQLWithReturns(sql, sqlParams);
             if (await reader.ReadAsync())
             {
-                return new UserEntity(reader.GetString(0), reader.GetString(1));
+                return new UserEntity(reader.GetString(0), reader.GetString(1), reader.GetString(2),reader.GetInt32(3));
             }
             return null;
         }

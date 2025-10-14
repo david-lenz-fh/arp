@@ -63,13 +63,21 @@ namespace BusinessLogic
             {
                 return null;
             }
-            return new User(found.Username, found.Password);
+            Genre? fav = null;
+            if (found.FavoriteGenreId != null)
+            {
+                var foundGenre = await _dal.MediaRepo.FindGenreById(found.FavoriteGenreId.Value);
+                if (foundGenre != null) {
+                    fav = new Genre(foundGenre.Id, foundGenre.Name);
+                }
+            }
+            return new User(found.Username, found.Password, found.Email, fav);
 
         }
         public async Task<Token?> Register(User credentials)
         {
             string hashed = Hash(credentials.Password);
-            bool added = await _dal.UserRepo.AddUser(new UserEntity(credentials.Username, hashed));
+            bool added = await _dal.UserRepo.AddUser(new UserEntity(credentials.Username, hashed, null, null));
             if (added)
             {
                 string toEncrypt = GetValidTimeStamp() + ":" + credentials.Username;

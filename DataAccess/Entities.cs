@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Entities
 {
-    public record UserEntity(string Username, string Password);
+    public record UserEntity(string Username, string Password, string? Email, int? FavoriteGenreId);
     public record MediaEntity(int Id, string Title, string Description, DateTime ReleaseDate, int Fsk, List<GenreEntity> Genres, MediaTypeEntity MediaType);
     public record GenreEntity(int Id, string Name);
     public record MediaTypeEntity(int Id, string Name);

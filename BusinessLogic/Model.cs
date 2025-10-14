@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BusinessLogic.Models
 {
     public record Token(string token);
-    public record User(string Username, string Password);
+    public record User(string Username, string Password, string? Email, Genre? FavoriteGenre);
     public record Media(int Id, string Title, string Description, DateTime ReleaseDate, int Fsk, List<Genre> Genres, MediaType MediaType);
     public record Genre(int Id, string Name);
     public record MediaType(int Id, string Name);

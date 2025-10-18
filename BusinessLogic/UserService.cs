@@ -25,7 +25,7 @@ namespace BusinessLogic
                 secretPrivateKey=sha256.ComputeHash(Encoding.UTF8.GetBytes("MeinGeheimToken"));
             }
 }
-        public async Task<Token?> Login(User credentials)
+        public async Task<Token?> Login(Login credentials)
         {
             string hashed=Hash(credentials.Password);
             UserEntity? loginUser=await _dal.UserRepo.FindUserByName(credentials.Username);
@@ -74,7 +74,7 @@ namespace BusinessLogic
             return new User(found.Username, found.Password, found.Email, fav);
 
         }
-        public async Task<Token?> Register(User credentials)
+        public async Task<Token?> Register(Login credentials)
         {
             string hashed = Hash(credentials.Password);
             bool added = await _dal.UserRepo.AddUser(new UserEntity(credentials.Username, hashed, null, null));

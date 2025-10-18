@@ -37,9 +37,9 @@ namespace API
 
             return JsonSerializer.Deserialize<T>(body);
         }
-        public static void SendEmptyStatus(HttpListenerContext ctx, int statusCode, string description)
+        public static void SendEmptyStatus(HttpListenerContext ctx, HttpStatusCode statusCode, string description)
         {
-            ctx.Response.StatusCode = statusCode;
+            ctx.Response.StatusCode = (int)statusCode;
             ctx.Response.StatusDescription = description;
             ctx.Response.Close();
 

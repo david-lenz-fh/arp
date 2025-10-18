@@ -23,7 +23,8 @@ namespace DataAccess
             var reader = await _postgres.SQLWithReturns(sql, sqlParams);
             if (await reader.ReadAsync())
             {
-                return new UserEntity(reader.GetString(0), reader.GetString(1), reader.GetString(2),reader.GetInt32(3));
+                string? email = reader.IsDBNull(2) ? null : reader.GetString(2);
+                return new UserEntity(reader.GetString(0), reader.GetString(1),email,reader.GetFieldValue<int?>(3));
             }
             return null;
         }

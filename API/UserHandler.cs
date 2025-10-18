@@ -17,37 +17,37 @@ namespace API
         }
         public async Task Login(HttpListenerContext ctx)
         {
-            var login = await ReadJSONRequestAsync<User>(ctx);
+            var login = await ReadJSONRequestAsync<LoginDTO>(ctx);
             if (login == null)
             {
-                SendEmptyStatus(ctx, 400, "No Login Information was send");
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Login Information was send");
                 return;
             }            
-            Token? token = await _bl.UserService.Login(login);
+            Token? token = await _bl.UserService.Login(new Login(login.Username, login.Password));
             if (token == null)
             {
-                SendEmptyStatus(ctx, 404,"Couldn't authenticate");
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized,"Couldn't authenticate");
                 return;
             }
-            ctx.Response.StatusCode = 200;
+            ctx.Response.StatusCode = (int)HttpStatusCode.OK;
             ctx.Response.StatusDescription = "Login successfull";
             WriteJson<Token>(ctx, token);
         }
         public async Task Register(HttpListenerContext ctx)
         {
-            var registrationData= await ReadJSONRequestAsync<User>(ctx);
+            var registrationData= await ReadJSONRequestAsync<LoginDTO>(ctx);
             if (registrationData == null)
             {
-                SendEmptyStatus(ctx, 400, "No User Information");
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No User Information");
                 return;
             }
-            Token? token=await _bl.UserService.Register(registrationData);
+            Token? token=await _bl.UserService.Register(new Login(registrationData.Username, registrationData.Password));
             if (token == null)
             {
-                SendEmptyStatus(ctx, 404, "Error creating Account");
+                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Error creating Account");
                 return;
             }
-            ctx.Response.StatusCode = 201;
+            ctx.Response.StatusCode = (int)HttpStatusCode.Created;
             ctx.Response.StatusDescription = "User Registered";
             WriteJson<Token>(ctx, token);
         }
@@ -56,13 +56,13 @@ namespace API
             var token = await ReadJSONRequestAsync<Token>(ctx);
             if(token == null)
             {
-                SendEmptyStatus(ctx, 400, "No Token was send");
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No Token was send");
                 return;
             }
             User? added=await _bl.UserService.GetUserByToken(token.token);
             if (added == null)
             {
-                SendEmptyStatus(ctx, 400,"Token invalid");
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized,"Token invalid");
                 return;
             }
             WriteJson<User>(ctx, added);

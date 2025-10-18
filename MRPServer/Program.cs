@@ -8,7 +8,7 @@ using mrp;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         //Data Access Layer
         PostgresDB postgresDB = PostgresDB.Initialize();
@@ -31,6 +31,8 @@ class Program
 
         //Server
         MRPServer mrp = new MRPServer(api);
+
+        var s= await dal.MediaRepo.FindGenreById(1);
         mrp.Listen();
     }
 }

@@ -57,7 +57,7 @@ namespace DataAccess
         }
         public async Task<GenreEntity?> FindGenreById(int id)
         {
-            String sql = "SELECT name FROM genre WHERE id=@id";
+            String sql = "SELECT name_eng FROM genre WHERE id=@id";
             var sqlParams = new Dictionary<string, object?>
             {
                 ["id"] = id,
@@ -65,7 +65,7 @@ namespace DataAccess
             var reader = await _postgres.SQLWithReturns(sql, sqlParams);
             if (await reader.ReadAsync())
             {
-                return new GenreEntity(reader.GetInt32(0), reader.GetString(1));
+                return new GenreEntity(id, reader.GetString(0));
             }
             return null;
         }

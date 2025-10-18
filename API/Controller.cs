@@ -29,7 +29,17 @@ namespace API
             ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
             ctx.Response.Close();
         }
-
+        public static Token? ReadBearerToken(HttpListenerContext ctx)
+        {
+            string token=ctx.Request.Headers["Authorization"]??"";
+            int overheadSize = "Bearer ".Length;
+            if (token.Length <= overheadSize)
+            {
+                return null;
+            }
+            token = token.Substring(overheadSize);
+            return new Token(token);
+        }
         public async static Task<T?> ReadJSONRequestAsync<T>(HttpListenerContext ctx)
         {
             using var reader = new StreamReader(ctx.Request.InputStream, ctx.Request.ContentEncoding);

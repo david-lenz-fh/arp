@@ -38,7 +38,15 @@ namespace BusinessLogic
         }
         public async Task<User?> GetUserByToken(string token)
         {
-            string plaintext = AES.Decrypt(token, secretPrivateKey);
+            string plaintext = "";
+            try
+            {
+                plaintext = AES.Decrypt(token, secretPrivateKey);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
             string[] tokenVariables = plaintext.Split(":");
             if (tokenVariables.Length != 2 || tokenVariables[0] == null || tokenVariables[1] == null )
             {

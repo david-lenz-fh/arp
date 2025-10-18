@@ -53,7 +53,7 @@ namespace API
         }
         public async Task GetUser(HttpListenerContext ctx)
         {
-            var token = await ReadJSONRequestAsync<Token>(ctx);
+            var token = ReadBearerToken(ctx);
             if(token == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No Token was send");

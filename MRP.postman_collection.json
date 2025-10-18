@@ -16,7 +16,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"Username\":\"David2\",\r\n    \"Password\":\"ichLiebeC#\"\r\n}",
+					"raw": "{\r\n    \"Username\":\"Raoul Holzer\",\r\n    \"Password\":\"IchGebeVollePunkte\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -44,7 +44,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"Username\":\"David\",\r\n    \"Password\":\"ichLiebeC#\"\r\n}",
+					"raw": "{\r\n    \"Username\":\"David22\",\r\n    \"Password\":\"ichLiebeC#\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -61,6 +61,34 @@
 					"path": [
 						"users",
 						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Token testen (bei Authorization Bearer Token))",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "DqiIxGpbcP8hMDcB5WA6K9QhUyFkFSLe+0NqKYZKZ85VcUzaejXidhvGYfsIxvkq",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/user",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user"
 					]
 				}
 			},

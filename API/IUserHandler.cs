@@ -11,5 +11,8 @@ namespace API
     {
         public Task Login(HttpListenerContext ctx);
         public Task Register(HttpListenerContext ctx);
+
+        //Für die Zwischenabgabe zum Testen
+        public Task GetUser(HttpListenerContext ctx);
     }
 }

@@ -16,6 +16,7 @@ namespace mrp
 
         internal MRPServer(IAPI api)
         {       
+            this.api = api;
             url = "http://localhost:8080/";
             listener.Prefixes.Add(url);
 
@@ -24,8 +25,10 @@ namespace mrp
                 //Implementiert
                 [("/users/register", "POST")] = ctx => api.UserHandler.Register(ctx),
                 [("/users/login", "POST")] = ctx => api.UserHandler.Login(ctx),
+                //TEST für Zwischenabgabe
+                [("/user", "GET")] = ctx => api.UserHandler.GetUser(ctx),
                 //Nicht Implementiert
-                [("/users/{userId}/profile","GET")] = ctx => WriteResponse(ctx, "Test!"),
+                /*[("/users/{userId}/profile","GET")] = ctx => WriteResponse(ctx, "Test!"),
                 [("/users/{userId}/profile", "PUT")] = ctx => WriteResponse(ctx, "Test!"),
                 [("/users/{userdId}/ratings","GET")] = ctx => WriteResponse(ctx, "Test!"),
                 [("/users/{userId}/profiles","GET")] = ctx => WriteResponse(ctx, "Test!"),
@@ -41,7 +44,7 @@ namespace mrp
                 [("/media/{mediaId}/favorite","POST")] = ctx => WriteResponse(ctx, "Test!"),
                 [("/media/{mediaId}/favorite", "DELETE")] = ctx => WriteResponse(ctx, "Test!"),
                 [("/users/{userId}/recommendations","GET")] = ctx => WriteResponse(ctx, "Test!"),
-                [("/leaderboard","GET")] = ctx => WriteResponse(ctx, "Test!")
+                [("/leaderboard","GET")] = ctx => WriteResponse(ctx, "Test!")*/
             };
         }
         public void Listen()
@@ -87,25 +90,9 @@ namespace mrp
             }
             else
             {
-                WriteResponse(requestContext, "404 Not Found");
+                requestContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
             }
         }
 
-        //SRP (keine Handler von Requests in der selben Klasse wie Server starten)
-        private void WriteResponse(HttpListenerContext ctx, string text)
-        {
-            byte[] buffer = Encoding.UTF8.GetBytes(text);
-            ctx.Response.ContentLength64 = buffer.Length;
-            ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            ctx.Response.OutputStream.Close();
-        }
-        private void Error404(HttpListenerContext ctx)
-        {
-            byte[] buffer = Encoding.UTF8.GetBytes("Not Found");
-            ctx.Response.ContentLength64 = buffer.Length;
-            ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            ctx.Response.OutputStream.Close();
-            ctx.Response.StatusCode = 404;
-        }
     }
 }

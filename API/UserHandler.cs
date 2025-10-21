@@ -67,5 +67,10 @@ namespace API
             }
             WriteJson<User>(ctx, added);
         }
+
+        public Task GetUserProfile(HttpListenerContext ctx, Dictionary<string, string>? parameters)
+        {
+            return null;
+        }
     }    
 }

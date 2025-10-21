@@ -14,5 +14,6 @@ namespace API
 
         //Für die Zwischenabgabe zum Testen
         public Task GetUser(HttpListenerContext ctx);
+        public Task GetUserProfile(HttpListenerContext ctx, Dictionary<string, string>? parameters);
     }
 }

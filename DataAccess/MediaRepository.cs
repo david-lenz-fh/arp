@@ -13,33 +13,33 @@ namespace DataAccess
         {
             var re=new List<MediaEntity>();
             String sql = """
-                SELECT media.id, media.name, media.description, media.release_date, media.fsk, 
-                COALESCE(array_agg(genre.name), '{}') AS genre_names, media_type.id AS type_id, media_type.name AS type_name
+                SELECT media.id, media.title, media.description, media.release_date, media.fsk,  
+                COALESCE(array_agg(genre.genre_name), '{}') AS genre_names, media_type.name AS type_name
                 FROM media
-                LEFT JOIN media_genre ON media.id=media_genre.media_id
-                LEFT JOIN genre ON media_genre.genre_id=genre.id
-                LEFT JOIN media_type ON media.media_type_id=media_type.id
-                GROUP BY media.id, media.name, media.description, media.release_date, media.fsk, media_type.name, media_type.id
+                LEFT JOIN genre_media ON media.id=genre_media.media_id
+                LEFT JOIN genre ON genre_media.genre_name=genre.genre_name
+                LEFT JOIN media_type ON media.media_type=media_type.name
+                GROUP BY media.id, media.title, media.description, media.release_date, media.fsk, media_type.name
                 """;
             var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { });
             while (await reader.ReadAsync())
             {
-                re.Add(new MediaEntity(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), reader.GetInt32(4),
-                                  reader.GetFieldValue<string[]>(5).ToList(), new MediaTypeEntity(reader.GetInt32(6), reader.GetString(7))));
+                re.Add(new MediaEntity(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetFieldValue<DateOnly>(3), reader.GetInt32(4),
+                                  reader.GetFieldValue<string[]>(5).ToList(), reader.GetString(6)));
             }
             return re;
         }
         public async Task<MediaEntity?> FindMediaById(int id)
         {
             String sql = """
-                SELECT media.id, media.name, media.description, media.release_date, media.fsk,
-                COALESCE(array_agg(genre.name), '{}') AS genre_names, media_type.id AS type_id, media_type.name AS type_name
+                SELECT media.id, media.title, media.description, media.release_date, media.fsk,  
+                COALESCE(array_agg(genre.genre_name), '{}') AS genre_names, media_type.name AS type_name
                 FROM media
-                LEFT JOIN media_genre ON media.id=media_genre.media_id
-                LEFT JOIN genre ON media_genre.genre_id=genre.id
-                LEFT JOIN media_type ON media.media_type_id=media_type.id
+                LEFT JOIN genre_media ON media.id=genre_media.media_id
+                LEFT JOIN genre ON genre_media.genre_name=genre.genre_name
+                LEFT JOIN media_type ON media.media_type=media_type.name
                 WHERE media.id=@media_id
-                GROUP BY media.id, media.name, media.description, media.release_date, media.fsk, media_type.name, media_type.id
+                GROUP BY media.id, media.title, media.description, media.release_date, media.fsk, media_type.name
                 """;
 
             var sqlParams = new Dictionary<string, object?>
@@ -49,8 +49,14 @@ namespace DataAccess
             var reader = await _postgres.SQLWithReturns(sql, sqlParams);
             if (await reader.ReadAsync())
             {
-                return new MediaEntity(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), 
-                                       reader.GetInt32(4), reader.GetFieldValue<string[]>(5).ToList(), new MediaTypeEntity(reader.GetInt32(6), reader.GetString(7)));
+                string? title = reader.IsDBNull(1) ? null : reader.GetString(1);
+                string? description = reader.IsDBNull(2) ? null : reader.GetString(2);
+                DateOnly? release = reader.IsDBNull(3) ? null : reader.GetFieldValue<DateOnly>(3);
+                int? fsk = reader.IsDBNull(4) ? null : reader.GetInt32(4);
+                List<string> genres = reader.GetFieldValue<string[]>(5).ToList();
+                string? mediaType = reader.IsDBNull(6) ? null : reader.GetString(6);
+
+                return new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres,  mediaType);
             }
             return null;
         }
@@ -62,17 +68,6 @@ namespace DataAccess
             while (await reader.ReadAsync())
             {
                 re.Add(reader.GetString(0));
-            }
-            return re;
-        }
-        public async Task<List<MediaTypeEntity>> GetMediaTypes()
-        {
-            var re = new List<MediaTypeEntity>();
-            String sql = "SELECT name FROM media_type";
-            var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { });
-            while (await reader.ReadAsync())
-            {
-                re.Add(new MediaTypeEntity(reader.GetInt32(0), reader.GetString(1)));
             }
             return re;
         }
@@ -127,7 +122,7 @@ namespace DataAccess
                     COALESCE(@description, description),
                     COALESCE(@release_date, release_date),
                     COALESCE(@fsk, fsk),
-                    COALESCE(@media_type_id, media_type_id)
+                    COALESCE(@media_type, media_type)
                 WHERE id=@media_id
                 """;
             var sql_params = new Dictionary<string, object?> {
@@ -136,7 +131,7 @@ namespace DataAccess
                 ["description"] = media.Description,
                 ["release_date"] = media.ReleaseDate,
                 ["fsk"] = media.Fsk,
-                ["media_type_id"] = media.MediaType?.Id
+                ["media_type"] = media.MediaType
             };
             int changedRow=await _postgres.SQLWithoutReturns(sql, sql_params);
             if (changedRow >= 1)

@@ -74,7 +74,7 @@ namespace API
         }
         public async Task UpdateUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
-            User? authenticatedUser = await GetUserFromToken(ctx);
+            User? authenticatedUser = await _bl.UserService.GetUserFromToken(ReadBearerToken(ctx));
             if (authenticatedUser == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "Authentication failed");
@@ -112,20 +112,6 @@ namespace API
                 return;
             }
             SendEmptyStatus(ctx, HttpStatusCode.OK, "User profile was successfully updated");
-        }
-        private async Task<User?> GetUserFromToken(HttpListenerContext ctx)
-        {
-            var token = ReadBearerToken(ctx);
-            if (token == null)
-            {
-                return null;
-            }
-            User? found = await _bl.UserService.GetUserByToken(token.token);
-            if (found == null)
-            {
-                return null;
-            }
-            return found;
         }
     }    
 }

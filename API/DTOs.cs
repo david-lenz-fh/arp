@@ -10,7 +10,8 @@ namespace API
     public record MediaDTO(int Id, string Title, string Description, DateTime ReleaseDate, int Fsk, List<GenreDTO> Genres, MediaTypeDTO MediaType);
     public record GenreDTO(int Id, string Name);
     public record MediaTypeDTO(int Id, string Name);
-    public record ReviewDTO(int Id, LoginDTO User, MediaDTO Media, string Comment, int Rating);
+    public record RatingDTO(int Id, string Username, RatingMediaDTO Media, string? Comment, int? Rating);
+    public record RatingMediaDTO(int Id, string Medianame);
     public record FavouriteDTO(int UserId, int MediaId);
     public record ProfileDTO(string? Email, string? FavouriteGenre);
 }

@@ -18,9 +18,9 @@ class Program
         IDAL dal = new DAL(mediaRepository, userRepository, ratingRepository);
 
         //Business Layer
-        IRatingService ratingService = new RatingService(dal);
         IUserService userService = new UserService(dal);
         IMediaService mediaService = new MediaService(dal);
+        IRatingService ratingService = new RatingService(dal, mediaService, userService);
         IBL businessLayer = new BL(userService, mediaService, ratingService);
 
         //API Layer

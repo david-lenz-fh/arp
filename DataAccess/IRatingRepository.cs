@@ -9,7 +9,8 @@ namespace DataAccess
 {
     public interface IRatingRepository
     {
-        public Task<RatingEntity?> GetRatingById(int id);
+        public Task<RatingEntity?> FindRatingById(int id);
+        public Task<List<RatingEntity>> GetRatingsForUser(string username);
         public Task<int?> AddRating(AddRating added);
         public Task<bool> UpdateRating(UpdateRating updated);
         public Task<bool> DeleteRating(UpdateRating updated);

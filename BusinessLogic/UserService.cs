@@ -96,6 +96,19 @@ namespace BusinessLogic
             var update=new UserEntity(updatedUser.Username, updatedUser.Password, updatedUser.Email, updatedUser.FavouriteGenre);
             return await _dal.UserRepo.UpdateUser(update);
         }
+        public async Task<User?> GetUserFromToken(Token? token)
+        {
+            if (token == null)
+            {
+                return null;
+            }
+            User? found = await GetUserByToken(token.token);
+            if (found == null)
+            {
+                return null;
+            }
+            return found;
+        }
         private static long GetValidTimeStamp()
         {
             return DateTime.Now.Add(TimeSpan.FromSeconds(7200)).Ticks;
@@ -115,6 +128,7 @@ namespace BusinessLogic
                 return builder.ToString();
             }
         }
+
 
     }
 }

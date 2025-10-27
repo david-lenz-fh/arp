@@ -10,5 +10,6 @@ namespace BusinessLogic
         public Task<User?> GetUserByToken(string token);
         public Task<User?> FindUserByName(string username);
         public Task<bool> UpdateUser(User updatedUser);
+        public Task<User?> GetUserFromToken(Token? token);
     }
 }

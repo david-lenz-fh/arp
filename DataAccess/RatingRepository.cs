@@ -12,7 +12,7 @@ namespace DataAccess
             _postgres_db = postgres;
         }
 
-        public async Task<RatingEntity?> GetRatingById(int id)
+        public async Task<RatingEntity?> FindRatingById(int id)
         {
             string sql = "SELECT id, username, media_id, comment, rating FROM rating WHERE id=@id";
             var sqlParams = new Dictionary<string, object?> { ["id"] = id };
@@ -94,6 +94,27 @@ namespace DataAccess
             };
             int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
             return changedRows > 0;
+        }
+
+        public async Task<List<RatingEntity>> GetRatingsForUser(string username)
+        {
+            var re = new List<RatingEntity>();
+                string sql = """
+                SELECT review_id, username, media_id, "comment", rating FROM rating 
+                WHERE username=@username
+                """;
+            var sqlParams = new Dictionary<string, object?>
+            {
+                ["username"] = username
+            };
+            var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
+            while (await reader.ReadAsync())
+            {
+                string? comment = reader.IsDBNull(3) ? null : reader.GetString(3);
+                int? rating = reader.IsDBNull(4) ? null : reader.GetInt32(4);
+                re.Add(new RatingEntity(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2), comment, rating));
+            }
+            return re;
         }
     }
 }

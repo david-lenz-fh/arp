@@ -11,8 +11,8 @@ namespace API
     {
         public Task Login(HttpListenerContext ctx);
         public Task Register(HttpListenerContext ctx);
-
         public Task GetUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task UpdateUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters);
+
     }
 }

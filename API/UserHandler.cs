@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace API
@@ -68,9 +69,53 @@ namespace API
             WriteJson<User>(ctx, added);
         }
 
-        public Task GetUserProfile(HttpListenerContext ctx, Dictionary<string, string>? parameters)
+        public async Task GetUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
-            return null;
+            string? username = parameters["userId"];
+            if(username == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No UserId");
+                return;
+            }
+            username = HttpUtility.UrlDecode(username);
+            User? foundUser = await _bl.UserService.FindUserByName(username);
+            if(foundUser == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("User \"{0}\" not found", username));
+                return;
+            }
+            var profile = new ProfileDTO(foundUser.Email, foundUser.FavouriteGenre);
+            WriteJson<ProfileDTO>(ctx, profile);
+        }
+        public async Task UpdateUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
+            ProfileDTO? updateProfile = await ReadJSONRequestAsync<ProfileDTO>(ctx);
+            if (updateProfile == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Profile Data in Request Body");
+                return;
+            }
+            string? username = parameters["userId"];
+            if (username == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No username");
+                return;
+            }
+            username = HttpUtility.UrlDecode(username);
+            User? foundUser = await _bl.UserService.FindUserByName(username);
+            if (foundUser == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("User \"{0}\" not found", username));
+                return;
+            }
+            var updateUser = new User(foundUser.Username, foundUser.Password, updateProfile.Email, updateProfile.FavouriteGenre);
+            bool wasUpdated = await _bl.UserService.UpdateUser(updateUser);
+            if (!wasUpdated) 
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt update User Profile");
+                return;
+            }
+            SendEmptyStatus(ctx, HttpStatusCode.OK, "User profile was successfully updated");
         }
     }    
 }

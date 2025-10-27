@@ -43,7 +43,7 @@ namespace BusinessLogic
             {
                 plaintext = AES.Decrypt(token, secretPrivateKey);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -65,23 +65,20 @@ namespace BusinessLogic
             {
                 return null;
             }
+            return await FindUserByName(tokenVariables[1]);
+            
 
-            UserEntity? found = await _dal.UserRepo.FindUserByName(tokenVariables[1]);
+        }
+        public async Task<User?> FindUserByName(string username)
+        {
+            UserEntity? found = await _dal.UserRepo.FindUserByName(username);
             if (found == null)
             {
                 return null;
             }
-            Genre? fav = null;
-            if (found.FavoriteGenreId != null)
-            {
-                var foundGenre = await _dal.MediaRepo.FindGenreById(found.FavoriteGenreId.Value);
-                if (foundGenre != null) {
-                    fav = new Genre(foundGenre.Id, foundGenre.Name);
-                }
-            }
-            return new User(found.Username, found.Password, found.Email, fav);
-
+            return new User(found.Username, found.Password, found.Email, found.FavouriteGenre);
         }
+
         public async Task<Token?> Register(Login credentials)
         {
             string hashed = Hash(credentials.Password);
@@ -92,6 +89,12 @@ namespace BusinessLogic
                 return new Token(AES.Encrypt(toEncrypt, secretPrivateKey));
             }
             return null;
+        }
+
+        public async Task<bool> UpdateUser(User updatedUser)
+        {
+            var update=new UserEntity(updatedUser.Username, updatedUser.Password, updatedUser.Email, updatedUser.FavouriteGenre);
+            return await _dal.UserRepo.UpdateUser(update);
         }
         private static long GetValidTimeStamp()
         {
@@ -112,5 +115,6 @@ namespace BusinessLogic
                 return builder.ToString();
             }
         }
+
     }
 }

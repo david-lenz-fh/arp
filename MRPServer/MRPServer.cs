@@ -23,53 +23,53 @@ namespace mrp
             {
                 ["users"] = new RoutingNode(null, new Dictionary<string, RoutingNode>
                 {
-                    ["register"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                    ["register"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                     {
                         ["POST"] = (ctx, parameters) => api.UserHandler.Register(ctx)
                     }, null),
-                    ["login"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                    ["login"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                     {
                         ["POST"] = (ctx, parameters) => api.UserHandler.Login(ctx)
                     }, null),
                     ["{userId}"] = new RoutingNode(null, new Dictionary<string, RoutingNode>
                     {
-                        ["profile"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                        ["profile"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
                             ["GET"] = (ctx, parameters) => api.UserHandler.GetUserProfile(ctx, parameters),
-                            ["PUT"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                            ["PUT"] = (ctx, parameters) => api.UserHandler.UpdateUserProfile(ctx, parameters)
                         }, null),
-                        ["ratings"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                        ["ratings"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
                             ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                         }, null),
-                        ["favorites"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                        ["favorites"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
                             ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                         }, null),
-                        ["recommendations"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                        ["recommendations"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
                             ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                         }, null)
                     })
                 }),
-                ["media"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                ["media"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                 {
                     ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
                     ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                 }, new Dictionary<string, RoutingNode>
                 {
-                    ["{mediaId}"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                    ["{mediaId}"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                     {
                         ["DELETE"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
                         ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
                         ["PUT"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                     }, new Dictionary<string, RoutingNode>
                     {
-                        ["rate"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                        ["rate"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
                             ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                         }, null),
-                        ["favorite"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                        ["favorite"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
                             ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
                             ["DELETE"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
@@ -78,30 +78,30 @@ namespace mrp
                 }),
                 ["ratings"] = new RoutingNode(null, new Dictionary<string, RoutingNode>
                 {
-                    ["{ratingId}"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                    ["{ratingId}"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                     {
                         ["DELETE"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
                         ["PUT"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                     }, new Dictionary<string, RoutingNode>
                     {
-                        ["like"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                        ["like"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
                             ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                         }, null),
-                        ["confirm"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                        ["confirm"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
                             ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                         }, null),
                     })
                 }),
-                ["leaderboard"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                ["leaderboard"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                 {
                     ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                 }, null),
-                ["user"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>
+                ["user"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                 {
                     ["GET"] = (ctx, parameters) => api.UserHandler.GetUser(ctx)
-                },null)
+                }, null)
             });
         }
         public void Listen()
@@ -129,7 +129,7 @@ namespace mrp
             string httpMethod = requestContext.Request.HttpMethod;
             string[] paths = (requestContext.Request.Url?.AbsolutePath ?? "").Split('/');
 
-            var parameters=new Dictionary<string, string>();
+            Dictionary<string,string> parameters=new Dictionary<string, string>();
             var currentRoute = routes;
             foreach (string path in paths.Skip(1))
             {

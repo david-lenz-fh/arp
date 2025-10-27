@@ -11,7 +11,7 @@ namespace mrp
     public class RoutingNode
     {
         public readonly Dictionary<string, RoutingNode>? _children;
-        public readonly Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>? _routes;
+        public readonly Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>? _routes;
         
         
         public (RoutingNode?, (string, string)?) NextRoute(string childpath)
@@ -35,7 +35,7 @@ namespace mrp
             return (null, null);
         }
         public RoutingNode(
-            Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>?>>? routes,
+            Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>? routes,
             Dictionary<string, RoutingNode>? children)
         {
             _routes = routes;

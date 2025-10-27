@@ -13,7 +13,7 @@ namespace DataAccess
         {
             var re=new List<MediaEntity>();
             String sql = """
-                SELECT media.id, media.name, media.description, media.release_date, media.fsk, COALESCE(array_agg(genre.name), '{}') AS genre_ids, 
+                SELECT media.id, media.name, media.description, media.release_date, media.fsk, 
                 COALESCE(array_agg(genre.name), '{}') AS genre_names, media_type.id AS type_id, media_type.name AS type_name
                 FROM media
                 LEFT JOIN media_genre ON media.id=media_genre.media_id
@@ -25,14 +25,14 @@ namespace DataAccess
             while (await reader.ReadAsync())
             {
                 re.Add(new MediaEntity(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), reader.GetInt32(4),
-                                 TransformToGenre(reader.GetFieldValue<int[]>(5), reader.GetFieldValue<string[]>(6)), new MediaTypeEntity(reader.GetInt32(7), reader.GetString(8))));
+                                  reader.GetFieldValue<string[]>(5).ToList(), new MediaTypeEntity(reader.GetInt32(6), reader.GetString(7))));
             }
             return re;
         }
         public async Task<MediaEntity?> FindMediaById(int id)
         {
             String sql = """
-                SELECT media.id, media.name, media.description, media.release_date, media.fsk, COALESCE(array_agg(genre.name), '{}') AS genre_ids, 
+                SELECT media.id, media.name, media.description, media.release_date, media.fsk,
                 COALESCE(array_agg(genre.name), '{}') AS genre_names, media_type.id AS type_id, media_type.name AS type_name
                 FROM media
                 LEFT JOIN media_genre ON media.id=media_genre.media_id
@@ -50,33 +50,18 @@ namespace DataAccess
             if (await reader.ReadAsync())
             {
                 return new MediaEntity(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), 
-                                       reader.GetInt32(4), TransformToGenre(reader.GetFieldValue<int[]>(5),
-                                       reader.GetFieldValue<string[]>(6)), new MediaTypeEntity(reader.GetInt32(7), reader.GetString(8)));
+                                       reader.GetInt32(4), reader.GetFieldValue<string[]>(5).ToList(), new MediaTypeEntity(reader.GetInt32(6), reader.GetString(7)));
             }
             return null;
         }
-        public async Task<GenreEntity?> FindGenreById(int id)
+        public async Task<List<string>> GetGenres()
         {
-            String sql = "SELECT name_eng FROM genre WHERE id=@id";
-            var sqlParams = new Dictionary<string, object?>
-            {
-                ["id"] = id,
-            };
-            var reader = await _postgres.SQLWithReturns(sql, sqlParams);
-            if (await reader.ReadAsync())
-            {
-                return new GenreEntity(id, reader.GetString(0));
-            }
-            return null;
-        }
-        public async Task<List<GenreEntity>> GetGenres()
-        {
-            var re=new List<GenreEntity>();
-            String sql = "SELECT id, name FROM genre";
+            var re=new List<string>();
+            String sql = "SELECT genre_name FROM genre";
             var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { });
             while (await reader.ReadAsync())
             {
-                re.Add(new GenreEntity(reader.GetInt32(0), reader.GetString(1)));
+                re.Add(reader.GetString(0));
             }
             return re;
         }
@@ -184,15 +169,6 @@ namespace DataAccess
             {
                 return false;
             }
-        }
-        private static List<GenreEntity> TransformToGenre(int[] ids, string[] names)
-        {
-            var re=new List<GenreEntity>();
-            for(int i=0; i<ids.Length; i++)
-            {
-                re.Add(new GenreEntity(ids[i], names[i]));
-            }
-            return re;
         }
     }
 }

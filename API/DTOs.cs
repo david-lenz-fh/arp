@@ -12,6 +12,5 @@ namespace API
     public record MediaTypeDTO(int Id, string Name);
     public record ReviewDTO(int Id, LoginDTO User, MediaDTO Media, string Comment, int Rating);
     public record FavouriteDTO(int UserId, int MediaId);
-
-
+    public record ProfileDTO(string? Email, string? FavouriteGenre);
 }

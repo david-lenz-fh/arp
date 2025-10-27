@@ -13,7 +13,7 @@ namespace DataAccess
         public async Task<UserEntity?> FindUserByName(string username)
         {
             string sql = """
-            SELECT username, password, email, favorite_genre_id 
+            SELECT username, password, email, favourite_genre_name 
             FROM mrp_user WHERE username=@username
             """;
             var sqlParams = new Dictionary<string, object?>
@@ -24,7 +24,8 @@ namespace DataAccess
             if (await reader.ReadAsync())
             {
                 string? email = reader.IsDBNull(2) ? null : reader.GetString(2);
-                return new UserEntity(reader.GetString(0), reader.GetString(1),email,reader.GetFieldValue<int?>(3));
+                string? favouriteGenre = reader.IsDBNull(3) ? null : reader.GetString(3);
+                return new UserEntity(reader.GetString(0), reader.GetString(1),email,favouriteGenre);
             }
             return null;
         }
@@ -69,20 +70,23 @@ namespace DataAccess
                 return false;
             }
         }
-        public async Task<bool> UpdatePassword(UserEntity updated)
+        public async Task<bool> UpdateUser(UserEntity updated)
         {
             try
             {
                 string sql = """
                     UPDATE mrp_user 
-                    SET password = @password
+                    SET password = @password, email=@email, favourite_genre_name=@favouriteGenre
                     WHERE username = @username
                     """;
                 var sqlParams = new Dictionary<string, object?>
                 {
                     ["username"] = updated.Username,
-                    ["password"] = updated.Password
+                    ["password"] = updated.Password,
+                    ["favouriteGenre"] = updated.FavouriteGenre,
+                    ["email"] = updated.Email
                 };
+
                 int changedRow = await _postgres.SQLWithoutReturns(sql, sqlParams);
                 return changedRow > 0;
             }

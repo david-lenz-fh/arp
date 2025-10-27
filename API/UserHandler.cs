@@ -52,22 +52,7 @@ namespace API
             ctx.Response.StatusDescription = "User Registered";
             WriteJson<Token>(ctx, token);
         }
-        public async Task GetUser(HttpListenerContext ctx)
-        {
-            var token = ReadBearerToken(ctx);
-            if(token == null)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No Token was send");
-                return;
-            }
-            User? added=await _bl.UserService.GetUserByToken(token.token);
-            if (added == null)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized,"Token invalid");
-                return;
-            }
-            WriteJson<User>(ctx, added);
-        }
+        
 
         public async Task GetUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
@@ -89,6 +74,12 @@ namespace API
         }
         public async Task UpdateUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
+            User? authenticatedUser = await GetUserFromToken(ctx);
+            if (authenticatedUser == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "Authentication failed");
+                return;
+            }
             ProfileDTO? updateProfile = await ReadJSONRequestAsync<ProfileDTO>(ctx);
             if (updateProfile == null)
             {
@@ -108,6 +99,11 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("User \"{0}\" not found", username));
                 return;
             }
+            if (foundUser.Username != authenticatedUser.Username)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "You have not authorization to change this profile");
+                return;
+            }
             var updateUser = new User(foundUser.Username, foundUser.Password, updateProfile.Email, updateProfile.FavouriteGenre);
             bool wasUpdated = await _bl.UserService.UpdateUser(updateUser);
             if (!wasUpdated) 
@@ -116,6 +112,20 @@ namespace API
                 return;
             }
             SendEmptyStatus(ctx, HttpStatusCode.OK, "User profile was successfully updated");
+        }
+        private async Task<User?> GetUserFromToken(HttpListenerContext ctx)
+        {
+            var token = ReadBearerToken(ctx);
+            if (token == null)
+            {
+                return null;
+            }
+            User? found = await _bl.UserService.GetUserByToken(token.token);
+            if (found == null)
+            {
+                return null;
+            }
+            return found;
         }
     }    
 }

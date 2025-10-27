@@ -97,10 +97,6 @@ namespace mrp
                 ["leaderboard"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                 {
                     ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
-                }, null),
-                ["user"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
-                {
-                    ["GET"] = (ctx, parameters) => api.UserHandler.GetUser(ctx)
                 }, null)
             });
         }

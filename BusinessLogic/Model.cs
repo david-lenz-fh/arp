@@ -12,5 +12,5 @@ namespace BusinessLogic.Models
     public record Login(string Username, string Password);
     public record MediaType(int Id, string Name);
     public record Review(int Id, User User, Media Media, string? Comment, int? Rating);
-    public record Favourite(int UserId, int MediaId);
+    public record Favourite(User user, Media media);
 }

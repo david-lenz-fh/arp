@@ -37,5 +37,37 @@ namespace API
             }
             WriteJson(ctx, ratings);
         }
+        public async Task GetUserFavourites(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
+            string? username = parameters["userId"];
+            if (username == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No User Id");
+                return;
+            }
+            username = HttpUtility.UrlDecode(username);
+            User? foundUser = await _bl.UserService.FindUserByName(username);
+            if (foundUser == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("User \"{0}\" not found", username));
+                return;
+            }
+
+            var foundFavourites=await _bl.RatingService.GetFavouritesFromUser(foundUser);
+            var favourites = new List<FavouriteDTO>();
+            foreach (var found in foundFavourites)
+            {
+                favourites.Add(new FavouriteDTO(found.user.Username,
+                    new FavouriteMediaDTO(found.media.Id, found.media.Title, found.media.ReleaseDate, found.media.MediaType)));
+            }
+            if (favourites.Count == 0)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.NotFound, "No User Favourites found");
+                return;
+            }
+            WriteJson(ctx, favourites);
+        }
+
+
     }
 }

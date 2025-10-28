@@ -44,7 +44,7 @@ namespace mrp
                         }, null),
                         ["favorites"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
-                            ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                            ["GET"] = (ctx, parameters) => api.RatingHandler.GetUserFavourites(ctx, parameters)
                         }, null),
                         ["recommendations"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {

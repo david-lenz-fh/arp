@@ -14,7 +14,8 @@ namespace DataAccess
         public Task<int?> AddRating(AddRating added);
         public Task<bool> UpdateRating(UpdateRating updated);
         public Task<bool> DeleteRating(UpdateRating updated);
-        public Task<bool> Favourite(int userId, int mediaId);
-        public Task<bool> Unfavourite(int userId, int mediaId);
+        public Task<bool> Favourite(string username, int mediaId);
+        public Task<bool> Unfavourite(string username, int mediaId);
+        public Task<List<FavouriteEntity>> GetFavourites(string username);
     }
 }

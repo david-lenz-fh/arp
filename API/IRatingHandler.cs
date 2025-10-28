@@ -10,5 +10,6 @@ namespace API
     public interface IRatingHandler
     {
         public Task GetUserRatings(HttpListenerContext ctx, Dictionary<string, string> parameters);
+        public Task GetUserFavourites(HttpListenerContext ctx, Dictionary<string, string> parameters);
     }
 }

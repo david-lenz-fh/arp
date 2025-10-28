@@ -34,5 +34,21 @@ namespace BusinessLogic
             }
             return re;
         }
+        public async Task<List<Favourite>> GetFavouritesFromUser(User user)
+        {
+            var re = new List<Favourite>();
+            var found = await _dal.RatingRepo.GetFavourites(user.Username);
+            foreach (var favourite in found)
+            {
+                var media = await _mediaService.FindMediaById(favourite.MediaId);
+                if (media == null)
+                {
+                    continue;
+                }
+                re.Add(new Favourite(user, media));
+            }
+            return re;
+        }
+
     }
 }

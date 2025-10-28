@@ -68,20 +68,20 @@ namespace DataAccess
             int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
             return changedRows > 0;
         }
-        public async Task<bool> Favourite(int userId, int mediaId)
+        public async Task<bool> Favourite(string username, int mediaId)
         {
             string sql = """
                 INSERT INTO favourite (username, media_id) 
                 VALUES (@username, @media_id)
                 """;
             var sqlParams = new Dictionary<string, object?> {
-                ["username"] = userId,
+                ["username"] = username,
                 ["media_id"] = mediaId
             };
             int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
             return changedRows > 0;
         }
-        public async Task<bool> Unfavourite(int userId, int mediaId)
+        public async Task<bool> Unfavourite(string username, int mediaId)
         {
             string sql = """
                 DELETE FROM favourite
@@ -89,7 +89,7 @@ namespace DataAccess
                 """;
             var sqlParams = new Dictionary<string, object?>
             {
-                ["username"] = userId,
+                ["username"] = username,
                 ["media_id"] = mediaId
             };
             int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
@@ -113,6 +113,25 @@ namespace DataAccess
                 string? comment = reader.IsDBNull(3) ? null : reader.GetString(3);
                 int? rating = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                 re.Add(new RatingEntity(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2), comment, rating));
+            }
+            return re;
+        }
+
+        public async Task<List<FavouriteEntity>> GetFavourites(string username)
+        {
+            var re = new List<FavouriteEntity>();
+            string sql = """
+                SELECT media_id FROM favourite 
+                WHERE username=@username
+                """;
+            var sqlParams = new Dictionary<string, object?>
+            {
+                ["username"] = username
+            };
+            var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
+            while (await reader.ReadAsync())
+            {
+                re.Add(new FavouriteEntity(username, reader.GetInt32(0)));
             }
             return re;
         }

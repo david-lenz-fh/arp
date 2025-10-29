@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Text;
 using DataAccess.Entities;
 namespace DataAccess
 {
@@ -9,37 +10,110 @@ namespace DataAccess
         {
             _postgres = postgres;
         }
-        public async Task<List<MediaEntity>> GetMedia()
+        public async Task<List<MediaEntity>> GetMedia(MediaFilterDAL filter)
         {
-            var re=new List<MediaEntity>();
-            String sql = """
-                SELECT media.id, media.title, media.description, media.release_date, media.fsk,  
-                COALESCE(array_agg(genre.genre_name), '{}') AS genre_names, media_type.name AS type_name
-                FROM media
-                LEFT JOIN genre_media ON media.id=genre_media.media_id
-                LEFT JOIN genre ON genre_media.genre_name=genre.genre_name
-                LEFT JOIN media_type ON media.media_type=media_type.name
-                GROUP BY media.id, media.title, media.description, media.release_date, media.fsk, media_type.name
-                """;
-            var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { });
+            
+            StringBuilder sql=new StringBuilder("""
+                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_rating
+                FROM media AS m
+                LEFT JOIN (
+                    SELECT media_id, COALESCE(array_agg(genre_name),'{}') AS genres FROM genre_media
+                    GROUP BY media_id
+                    ) AS gm ON m.id=gm.media_id
+                LEFT JOIN (
+                    SELECT media_id, AVG(rating.rating) AS average_rating FROM rating
+                    GROUP BY media_id
+                    ) AS r ON m.id=r.media_id
+                WHERE TRUE                
+                """);
+            var sqlParams = new Dictionary<string, object?>();
+
+            if (filter.Title != null)
+            {
+                sql.AppendLine("AND m.title=@title");
+                sqlParams.Add("title", filter.Title);
+            }
+            if (filter.MediaType != null)
+            {
+                sql.AppendLine("AND m.media_type=@mediaType");
+                sqlParams.Add("mediaType", filter.MediaType);
+            }
+            if (filter.Fsk != null)
+            {
+                sql.AppendLine("AND m.fsk<=@fsk");
+                sqlParams.Add("fsk", filter.Fsk);
+            }
+            if (filter.MinRating != null)
+            {
+                sql.AppendLine("AND r.average_rating>=@minRating");
+                sqlParams.Add("minRating", filter.MinRating);
+            }
+            if (filter.Genre != null)
+            {
+                sql.AppendLine("AND @genre=ANY(gm.genres)");
+                sqlParams.Add("genre", filter.Genre);
+            }
+            if (filter.ReleaseYear != null)
+            {
+                try
+                {
+                    var startReleaseFrame = DateOnly.Parse(filter.ReleaseYear + "-1-1");
+                    var endReleaseFrame = DateOnly.Parse(filter.ReleaseYear + "-12-31");
+                    sql.AppendLine("AND m.release_date>=@startReleaseFrame");
+                    sql.AppendLine("AND m.release_date<=@endReleaseFrame");
+                    sqlParams.Add("startReleaseFrame", startReleaseFrame);
+                    sqlParams.Add("endReleaseFrame", endReleaseFrame);
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            if (filter.SortBy != null)
+            {
+                switch (filter.SortBy)
+                {
+                    case "title":
+                        sql.AppendLine("ORDER BY m.title");
+                        break;
+                    case "year":
+                        sql.AppendLine("ORDER BY m.release_date");
+                        break;
+                    case "score":
+                        sql.AppendLine("ORDER BY m.release_date");
+                        break;
+                }
+            }
+            var re=new List<MediaEntity>();            
+            var reader = await _postgres.SQLWithReturns(sql.ToString(), sqlParams);
             while (await reader.ReadAsync())
             {
-                re.Add(new MediaEntity(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetFieldValue<DateOnly>(3), reader.GetInt32(4),
-                                  reader.GetFieldValue<string[]>(5).ToList(), reader.GetString(6)));
+                string? title = reader.IsDBNull(1)?null: reader.GetString(1);
+                string? description = reader.IsDBNull(2) ? null : reader.GetString(2);
+                DateOnly? release = reader.IsDBNull(3) ? null : reader.GetFieldValue<DateOnly>(3);
+                int? fsk = reader.IsDBNull(4) ? null : reader.GetInt32(4);
+                List<string> genres = reader.IsDBNull(5) ? new List<string>() : reader.GetFieldValue<string[]>(5).ToList();
+                string? mediaType = reader.IsDBNull(6)?null: reader.GetString(6);
+                double? averageRating = reader.IsDBNull(7) ? null : reader.GetDouble(7);
+
+                re.Add(new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres, mediaType,averageRating));
             }
             return re;
         }
         public async Task<MediaEntity?> FindMediaById(int id)
         {
             String sql = """
-                SELECT media.id, media.title, media.description, media.release_date, media.fsk,  
-                COALESCE(array_agg(genre.genre_name), '{}') AS genre_names, media_type.name AS type_name
-                FROM media
-                LEFT JOIN genre_media ON media.id=genre_media.media_id
-                LEFT JOIN genre ON genre_media.genre_name=genre.genre_name
-                LEFT JOIN media_type ON media.media_type=media_type.name
-                WHERE media.id=@media_id
-                GROUP BY media.id, media.title, media.description, media.release_date, media.fsk, media_type.name
+                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_rating
+                FROM media AS m
+                LEFT JOIN (
+                    SELECT media_id, COALESCE(array_agg(genre_name),'{}') AS genres FROM genre_media
+                    GROUP BY media_id
+                    ) AS gm ON m.id=gm.media_id
+                LEFT JOIN (
+                    SELECT media_id, AVG(rating.rating) AS average_rating FROM rating
+                    GROUP BY media_id
+                    ) AS r ON m.id=r.media_id
+                WHERE m.id=@media_id 
                 """;
 
             var sqlParams = new Dictionary<string, object?>
@@ -53,10 +127,11 @@ namespace DataAccess
                 string? description = reader.IsDBNull(2) ? null : reader.GetString(2);
                 DateOnly? release = reader.IsDBNull(3) ? null : reader.GetFieldValue<DateOnly>(3);
                 int? fsk = reader.IsDBNull(4) ? null : reader.GetInt32(4);
-                List<string> genres = reader.GetFieldValue<string[]>(5).ToList();
+                List<string> genres = reader.IsDBNull(5) ? new List<string>() : reader.GetFieldValue<string[]>(5).ToList();
                 string? mediaType = reader.IsDBNull(6) ? null : reader.GetString(6);
+                double? averageRating = reader.IsDBNull(7) ? null : reader.GetDouble(7);
 
-                return new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres,  mediaType);
+                return new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres, mediaType, averageRating);
             }
             return null;
         }

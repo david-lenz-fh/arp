@@ -11,7 +11,7 @@ namespace DataAccess
     {
 
         public Task<MediaEntity?> FindMediaById(int id);
-        public Task<List<MediaEntity>> GetMedia();
+        public Task<List<MediaEntity>> GetMedia(MediaFilterDAL filter);
         public Task<List<string>> GetGenres();
         public Task<int?> AddMedia(AddMedia media);
         public Task<bool> UpdateMedia(UpdateMedia media);

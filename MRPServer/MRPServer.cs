@@ -54,14 +54,14 @@ namespace mrp
                 }),
                 ["media"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                 {
-                    ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
+                    ["GET"] = (ctx, parameters) => api.MediaHandler.GetMedia(ctx),
                     ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                 }, new Dictionary<string, RoutingNode>
                 {
                     ["{mediaId}"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                     {
                         ["DELETE"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
-                        ["GET"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
+                        ["GET"] = (ctx, parameters) => api.MediaHandler.FindMediaById(ctx, parameters),
                         ["PUT"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                     }, new Dictionary<string, RoutingNode>
                     {

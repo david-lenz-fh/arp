@@ -5,5 +5,6 @@ namespace BusinessLogic
     public interface IMediaService
     {
         public Task<Media?> FindMediaById(int id);
+        public Task<List<Media>> GetMedia(MediaFilter filter);
     }
 }

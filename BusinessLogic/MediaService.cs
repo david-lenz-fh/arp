@@ -1,5 +1,6 @@
 ﻿using BusinessLogic.Models;
 using DataAccess;
+using DataAccess.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,23 @@ namespace BusinessLogic
             {
                 return null;
             }
-            return new Media(found.Id, found.Title, found.Description, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType);
+            return new Media(found.Id, found.Title, found.Description, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.AverageRating);
+        }
+
+        public async Task<List<Media>> GetMedia(MediaFilter filter)
+        {
+            var re=new List<Media>();
+            var foundMedias = await _dal.MediaRepo.GetMedia(
+                new MediaFilterDAL(filter.Title, filter.MediaType, filter.ReleaseYear, filter.Genre, filter.Fsk, filter.MinRating, filter.SortBy));
+            if (foundMedias == null)
+            {
+                return re;
+            }
+            foreach (var found in foundMedias)
+            {
+                re.Add(new Media(found.Id, found.Title, found.Description, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.AverageRating));
+            }
+            return re;
         }
     }
 }

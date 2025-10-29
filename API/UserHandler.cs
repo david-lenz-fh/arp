@@ -56,7 +56,7 @@ namespace API
 
         public async Task GetUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
-            string? username = parameters["userId"];
+            string? username = parameters.GetValueOrDefault("userId");
             if(username == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No UserId");
@@ -86,7 +86,7 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Profile Data in Request Body");
                 return;
             }
-            string? username = parameters["userId"];
+            string? username = parameters.GetValueOrDefault("userId");
             if (username == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No username");

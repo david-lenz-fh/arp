@@ -54,5 +54,22 @@ namespace API
             ctx.Response.Close();
 
         }
+        public static Dictionary<string, string> GetQueryParams(HttpListenerContext ctx) {
+            var re=new Dictionary<string, string>();
+            string? query = ctx.Request.Url?.Query;
+            if (query == null || query.Length < 1) {
+                return re;
+            }
+            List<string> queryParamsString = query.Substring(1).Split('&').ToList();
+            foreach (string param in queryParamsString)
+            {
+                string[] pairs = param.Split('=');
+                if (pairs.Length == 2)
+                {
+                    re[pairs[0]] = pairs[1];
+                }
+            }
+            return re;
+        }
     }
 }

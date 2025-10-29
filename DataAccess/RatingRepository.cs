@@ -100,7 +100,7 @@ namespace DataAccess
         {
             var re = new List<RatingEntity>();
                 string sql = """
-                SELECT review_id, username, media_id, "comment", rating FROM rating 
+                SELECT rating_id, username, media_id, "comment", rating FROM rating 
                 WHERE username=@username
                 """;
             var sqlParams = new Dictionary<string, object?>

@@ -57,5 +57,21 @@ namespace API
             }
             WriteJson(ctx, found);
         }
+
+        public async Task DeleteMediaById(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
+            string? mediaIdString = parameters.GetValueOrDefault("mediaId");
+            if (mediaIdString == null || !int.TryParse(mediaIdString, out int mediaId))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No valid mediaId was sent");
+                return;
+            }
+            if (!await _bl.MediaService.DeleteMediaById(mediaId))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("Media with the ID: {0} could not be deleted", mediaId));
+                return;
+            }
+            SendEmptyStatus(ctx, HttpStatusCode.OK, String.Format("Media with the ID: {0} was deleted", mediaId));
+        }
     }
 }

@@ -60,7 +60,7 @@ namespace mrp
                 {
                     ["{mediaId}"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                     {
-                        ["DELETE"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
+                        ["DELETE"] = (ctx, parameters) => api.MediaHandler.DeleteMediaById(ctx, parameters),
                         ["GET"] = (ctx, parameters) => api.MediaHandler.FindMediaById(ctx, parameters),
                         ["PUT"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
                     }, new Dictionary<string, RoutingNode>

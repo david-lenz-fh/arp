@@ -11,5 +11,6 @@ namespace API
     {
         public Task GetMedia(HttpListenerContext ctx);
         public Task FindMediaById(HttpListenerContext ctx, Dictionary<string, string> parameters);
+        public Task DeleteMediaById(HttpListenerContext ctx, Dictionary<string,string> parameters);
     }
 }

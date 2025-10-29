@@ -15,6 +15,8 @@ namespace BusinessLogic
         public MediaService(IDAL dal) {
             _dal = dal;
         }
+
+
         public async Task<Media?> FindMediaById(int id)
         {
             var found = await _dal.MediaRepo.FindMediaById(id);
@@ -25,6 +27,10 @@ namespace BusinessLogic
             return new Media(found.Id, found.Title, found.Description, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.AverageRating);
         }
 
+        public async Task<bool> DeleteMediaById(int id)
+        {
+            return await _dal.MediaRepo.DeleteMedia(id);
+        }
         public async Task<List<Media>> GetMedia(MediaFilter filter)
         {
             var re=new List<Media>();

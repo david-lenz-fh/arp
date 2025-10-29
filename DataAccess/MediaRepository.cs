@@ -225,15 +225,8 @@ namespace DataAccess
                     )
                     DELETE FROM media WHERE id=@id
                     """;
-                int changedRow = await _postgres.SQLWithoutReturns(sql, new Dictionary<string, object?> { ["id"] = id });
-                if (changedRow >= 1)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                int changedRows = await _postgres.SQLWithoutReturns(sql, new Dictionary<string, object?> { ["id"] = id });
+                return changedRows >= 1;
             }
             catch
             {

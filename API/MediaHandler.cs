@@ -95,5 +95,33 @@ namespace API
             }
             WriteJson(ctx, new { MediaId = newId});
         }
+        public async Task PutMedia(HttpListenerContext ctx, Dictionary<string,string> parameters)
+        {
+            string? mediaIdString = parameters.GetValueOrDefault("mediaId");
+            if (mediaIdString == null||!int.TryParse(mediaIdString, out int mediaId))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No MediaId");
+                return;
+            }
+            var putMedia = await ReadJSONRequestAsync<PostMediaDTO>(ctx);
+            if (putMedia == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No valid media was sent");
+                return;
+            }
+            DateOnly? release_date = null;
+            if (DateOnly.TryParse(putMedia.ReleaseYear + "-01-01", out DateOnly val))
+            {
+                release_date = val;
+            }
+
+            if(!await _bl.MediaService.PutMedia(
+                new PutMedia(mediaId, putMedia.Title, putMedia.Description, release_date, putMedia.AgeRestriction, putMedia.Genres, putMedia.MediaType)))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt change media");
+                return;
+            }
+            SendEmptyStatus(ctx, HttpStatusCode.OK, "Media was changed");
+        }
     }
 }

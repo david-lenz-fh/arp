@@ -62,7 +62,7 @@ namespace mrp
                     {
                         ["DELETE"] = (ctx, parameters) => api.MediaHandler.DeleteMediaById(ctx, parameters),
                         ["GET"] = (ctx, parameters) => api.MediaHandler.FindMediaById(ctx, parameters),
-                        ["PUT"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                        ["PUT"] = (ctx, parameters) => api.MediaHandler.PutMedia(ctx, parameters)
                     }, new Dictionary<string, RoutingNode>
                     {
                         ["rate"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>

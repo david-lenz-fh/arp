@@ -51,7 +51,11 @@ namespace BusinessLogic
         {
             var addMedia = new AddMedia(postedMedia.Title, postedMedia.Description, postedMedia.ReleaseDate, postedMedia.Fsk, postedMedia.Genres, postedMedia.MediaType);
             return await _dal.MediaRepo.AddMedia(addMedia);
-            
+        }
+        public async Task<bool> PutMedia(PutMedia putMedia)
+        {
+            var updateMedia = new UpdateMedia(putMedia.Id, putMedia.Title, putMedia.Description, putMedia.ReleaseDate, putMedia.Fsk, putMedia.Genres, putMedia.MediaType);
+            return await _dal.MediaRepo.UpdateMedia(updateMedia);
         }
     }
 }

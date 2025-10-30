@@ -170,7 +170,6 @@ namespace DataAccess
                     ["media_type"]=media.MediaType, 
                     ["genres"] = media.GenreNames.ToArray()
                 };
-                Console.WriteLine(sql);
                 var reader = await _postgres.SQLWithReturns(sql, sqlParams);
 
                 if (await reader.ReadAsync())
@@ -184,36 +183,57 @@ namespace DataAccess
                 return null;
             }
         }
-        public async Task<bool> UpdateMedia(UpdateMedia media)
-        {
-            string sql = """
-                WITH updated_genre AS(
-                    UPDATE genre_media
-                    SET COALESCE(@genre_id, genre_id)
-                    WHERE media_id = @media_id
-                )
-                UPDATE media 
-                SET COALESCE(@name, name),
-                    COALESCE(@description, description),
-                    COALESCE(@release_date, release_date),
-                    COALESCE(@fsk, fsk),
-                    COALESCE(@media_type, media_type)
-                WHERE id=@media_id
-                """;
-            var sql_params = new Dictionary<string, object?> {
-                ["media_id"] = media.Id,
-                ["name"] = media.Title,
-                ["description"] = media.Description,
-                ["release_date"] = media.ReleaseDate,
-                ["fsk"] = media.Fsk,
-                ["media_type"] = media.MediaType
-            };
-            int changedRow=await _postgres.SQLWithoutReturns(sql, sql_params);
-            if (changedRow >= 1)
+        public async Task<bool> UpdateMedia(UpdateMedia media) { 
+            StringBuilder sql = new StringBuilder("BEGIN;\n");
+            var sqlParams = new Dictionary<string, object?>
             {
-                return true;
+                ["media_id"] = media.Id
+            };
+            if (media.Genres!=null)
+            {
+                string genreSql = """
+                    DELETE FROM genre_media
+                    WHERE media_id=@media_id;
+
+                    INSERT INTO genre_media (media_id, genre_name)
+                    SELECT @media_id, unnest(@genre);
+                    """;
+                sql.AppendLine(genreSql);
+                sqlParams.Add("genre", media.Genres);
             }
-            return false;
+            sql.AppendLine("""UPDATE media SET id=id""");
+            if (media.Title != null)
+            {
+                sql.AppendLine(""", title=@title""");
+                sqlParams.Add("title", media.Title);
+            }
+            if (media.Description != null)
+            {
+                sql.AppendLine(""", description=@description""");
+                sqlParams.Add("description", media.Description);
+            }
+            if (media.ReleaseDate != null)
+            {
+                sql.AppendLine(""", release_date=@releaseDate""");
+                sqlParams.Add("releaseDate", media.ReleaseDate);
+            }
+            if (media.Fsk != null)
+            {
+                sql.AppendLine(""", fsk=@fsk""");
+                sqlParams.Add("fsk", media.Fsk);
+            }
+            if (media.MediaType != null)
+            {
+                sql.AppendLine(""", media_type=@mediaType""");
+                sqlParams.Add("mediaType", media.MediaType);
+            }
+            sql.AppendLine("""
+                WHERE id=@media_id;
+                COMMIT;
+                """);
+            Console.WriteLine(sql.ToString());
+            int changedRow=await _postgres.SQLWithoutReturns(sql.ToString(), sqlParams);
+            return changedRow >= 1;
         }
         public async Task<bool> DeleteMedia(int id)
         {

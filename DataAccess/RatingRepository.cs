@@ -61,10 +61,17 @@ namespace DataAccess
             int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
             return changedRows>0;
         }
-        public async Task<bool> DeleteRating(UpdateRating updated)
+        public async Task<bool> DeleteRatingById(int id)
         {
-            string sql = """DELETE FROM rating WHERE id=@id""";
-            var sqlParams = new Dictionary<string, object?> { ["id"] = updated.Id };
+            string sql = """
+                BEGIN;
+                DELETE FROM rating_likes WHERE rating_id=@id;
+                DELETE FROM rating WHERE rating_id=@id;
+                COMMIT;
+                """;
+            var sqlParams = new Dictionary<string, object?> { 
+                ["id"] = id 
+            };
             int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
             return changedRows > 0;
         }

@@ -64,5 +64,10 @@ namespace BusinessLogic
         {
             return await _dal.RatingRepo.Unfavourite(user.Username, media.Id);
         }
+
+        public async Task<bool> DeleteRatingById(int id)
+        {
+            return await _dal.RatingRepo.DeleteRatingById(id);
+        }
     }
 }

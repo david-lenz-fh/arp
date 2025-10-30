@@ -104,7 +104,35 @@ namespace API
             }
             WriteJson(ctx, new {ratingId=id});
         }
+        public async Task DeleteRating(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
 
+            string? ratingIdString = parameters.GetValueOrDefault("ratingId");
+            if (ratingIdString == null || !int.TryParse(ratingIdString, out int ratingId))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No MediaId");
+                return;
+            }
+            /*
+            Token? token = ReadBearerToken(ctx);
+            if (token == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
+                return;
+            }
+            User? user = await _bl.UserService.GetUserFromToken(token);
+            if (user == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No user with this authentication found");
+                return;
+            }*/
+            if (!await _bl.RatingService.DeleteRatingById(ratingId))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt Delete Rating");
+                return;
+            }
+            SendEmptyStatus(ctx, HttpStatusCode.OK, "Deleted rating");  
+        }
         public async Task Favourite(HttpListenerContext ctx, Dictionary<string,string> parameters)
         {
             string? mediaIdString = parameters.GetValueOrDefault("mediaId");
@@ -171,5 +199,6 @@ namespace API
             }
             SendEmptyStatus(ctx, HttpStatusCode.OK, "Unfavourited");
         }
+
     }
 }

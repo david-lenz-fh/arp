@@ -13,7 +13,7 @@ namespace DataAccess
         public Task<List<RatingEntity>> GetRatingsForUser(string username);
         public Task<int?> AddRating(AddRating added);
         public Task<bool> UpdateRating(UpdateRating updated);
-        public Task<bool> DeleteRating(UpdateRating updated);
+        public Task<bool> DeleteRatingById(int id);
         public Task<bool> Favourite(string username, int mediaId);
         public Task<bool> Unfavourite(string username, int mediaId);
         public Task<List<FavouriteEntity>> GetFavourites(string username);

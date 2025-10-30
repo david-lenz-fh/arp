@@ -12,13 +12,12 @@ namespace API
         }
         public async Task GetUserRatings(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
-            string? username = parameters["userId"];
+            string? username = parameters.GetValueOrDefault("userId");
             if (username == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No User Id");
                 return;
             }
-            username = HttpUtility.UrlDecode(username);
             User? foundUser = await _bl.UserService.FindUserByName(username);
             if (foundUser == null)
             {
@@ -39,13 +38,12 @@ namespace API
         }
         public async Task GetUserFavourites(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
-            string? username = parameters["userId"];
+            string? username = parameters.GetValueOrDefault("userId");
             if (username == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No User Id");
                 return;
             }
-            username = HttpUtility.UrlDecode(username);
             User? foundUser = await _bl.UserService.FindUserByName(username);
             if (foundUser == null)
             {

@@ -55,7 +55,7 @@ namespace mrp
                 ["media"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                 {
                     ["GET"] = (ctx, parameters) => api.MediaHandler.GetMedia(ctx),
-                    ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                    ["POST"] = (ctx, parameters) => api.MediaHandler.PostMedia(ctx),
                 }, new Dictionary<string, RoutingNode>
                 {
                     ["{mediaId}"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>

@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace API
 {
@@ -45,7 +46,7 @@ namespace API
             using var reader = new StreamReader(ctx.Request.InputStream, ctx.Request.ContentEncoding);
             var body = await reader.ReadToEndAsync();
 
-            return JsonSerializer.Deserialize<T>(body);
+            return JsonSerializer.Deserialize<T>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
         public static void SendEmptyStatus(HttpListenerContext ctx, HttpStatusCode statusCode, string description)
         {
@@ -66,6 +67,8 @@ namespace API
                 string[] pairs = param.Split('=');
                 if (pairs.Length == 2)
                 {
+                    pairs[0] = HttpUtility.UrlDecode(pairs[0]);
+                    pairs[1] = HttpUtility.UrlDecode(pairs[1]);
                     re[pairs[0]] = pairs[1];
                 }
             }

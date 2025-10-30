@@ -152,13 +152,13 @@ namespace DataAccess
             {
                 string sql = """
                     WITH new_media AS (
-                        INSERT INTO media (name, description, release_date, fsk, media_type_id)
-                        VALUES (@name, @description, @release_date, @fsk, @media_type_id)
+                        INSERT INTO media (title, description, release_date, fsk, media_type)
+                        VALUES (@name, @description, @release_date, @fsk, @media_type)
                         RETURNING id
                     )
-                    INSERT INTO genre_media (media_id, genre_id)
-                    SELECT new_media.id, genre.id FROM new_media
-                    JOIN genre ON genre.id = ANY(@genre_ids)
+                    INSERT INTO genre_media (media_id, genre_name)
+                    SELECT new_media.id, g.genre FROM new_media
+                    CROSS JOIN unnest(@genres) AS g(genre)
                     RETURNING media_id
                     """;
                 var sqlParams = new Dictionary<string, object?> 
@@ -167,15 +167,15 @@ namespace DataAccess
                     ["description"] = media.Description, 
                     ["release_date"] = media.ReleaseDate, 
                     ["fsk"]=media.Fsk, 
-                    ["media_type_id"]=media.MediaTypeId, 
-                    ["genre_ids"] = media.GenreIds 
+                    ["media_type"]=media.MediaType, 
+                    ["genres"] = media.GenreNames.ToArray()
                 };
-
+                Console.WriteLine(sql);
                 var reader = await _postgres.SQLWithReturns(sql, sqlParams);
 
                 if (await reader.ReadAsync())
                 {
-                    return reader.GetInt32(0);
+                    return reader.GetFieldValue<int?>(0);
                 }
                 return null;
             }

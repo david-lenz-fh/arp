@@ -7,5 +7,6 @@ namespace BusinessLogic
         public Task<Media?> FindMediaById(int id);
         public Task<List<Media>> GetMedia(MediaFilter filter);
         public Task<bool> DeleteMediaById(int id);
+        public Task<int?> PostMedia(PostMedia newMedia); 
     }
 }

@@ -73,5 +73,27 @@ namespace API
             }
             SendEmptyStatus(ctx, HttpStatusCode.OK, String.Format("Media with the ID: {0} was deleted", mediaId));
         }
+
+        public async Task PostMedia(HttpListenerContext ctx)
+        {
+            var postedMedia=await ReadJSONRequestAsync<PostMediaDTO>(ctx);
+            if (postedMedia == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No valid media was sent");
+                return;
+            }
+            DateOnly? release_date = null;
+            if(DateOnly.TryParse(postedMedia.ReleaseYear + "-01-01", out DateOnly val)){
+                release_date = val;
+            }
+            int? newId=await _bl.MediaService.PostMedia(new PostMedia(postedMedia.Title, postedMedia.Description, release_date,
+                postedMedia.AgeRestriction, postedMedia.Genres ?? new List<string>(), postedMedia.MediaType));
+            if (newId == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt add media");
+                return;
+            }
+            WriteJson(ctx, new { MediaId = newId});
+        }
     }
 }

@@ -4,7 +4,11 @@ namespace BusinessLogic
 {
     public interface IRatingService
     {
-        public Task<List<Review>> GetReviewsFromUser(User user);
+        public Task<List<Rating>> GetReviewsFromUser(User user);
         public Task<List<Favourite>> GetFavouritesFromUser(User user);
+        public Task<int?> PostRating(PostRating addRating);
+        public Task<bool> Favourite(User user, Media media);
+        public Task<bool> Unfavourite(User user, Media media);
+
     }
 }

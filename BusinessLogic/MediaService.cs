@@ -24,7 +24,7 @@ namespace BusinessLogic
             {
                 return null;
             }
-            return new Media(found.Id, found.Title, found.Description, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.AverageRating);
+            return new Media(found.Id, found.Title, found.Description, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.AverageStars);
         }
 
         public async Task<bool> DeleteMediaById(int id)
@@ -35,14 +35,14 @@ namespace BusinessLogic
         {
             var re=new List<Media>();
             var foundMedias = await _dal.MediaRepo.GetMedia(
-                new MediaFilterDAL(filter.Title, filter.MediaType, filter.ReleaseYear, filter.Genre, filter.Fsk, filter.MinRating, filter.SortBy));
+                new MediaFilterDAL(filter.Title, filter.MediaType, filter.ReleaseYear, filter.Genre, filter.Fsk, filter.MinStars, filter.SortBy));
             if (foundMedias == null)
             {
                 return re;
             }
             foreach (var found in foundMedias)
             {
-                re.Add(new Media(found.Id, found.Title, found.Description, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.AverageRating));
+                re.Add(new Media(found.Id, found.Title, found.Description, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.AverageStars));
             }
             return re;
         }

@@ -14,14 +14,14 @@ namespace DataAccess
         {
             
             StringBuilder sql=new StringBuilder("""
-                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_rating
+                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_stars
                 FROM media AS m
                 LEFT JOIN (
                     SELECT media_id, COALESCE(array_agg(genre_name),'{}') AS genres FROM genre_media
                     GROUP BY media_id
                     ) AS gm ON m.id=gm.media_id
                 LEFT JOIN (
-                    SELECT media_id, AVG(rating.rating) AS average_rating FROM rating
+                    SELECT media_id, AVG(rating.stars) AS average_stars FROM rating
                     GROUP BY media_id
                     ) AS r ON m.id=r.media_id
                 WHERE TRUE                
@@ -43,10 +43,10 @@ namespace DataAccess
                 sql.AppendLine("AND m.fsk<=@fsk");
                 sqlParams.Add("fsk", filter.Fsk);
             }
-            if (filter.MinRating != null)
+            if (filter.MinStars != null)
             {
-                sql.AppendLine("AND r.average_rating>=@minRating");
-                sqlParams.Add("minRating", filter.MinRating);
+                sql.AppendLine("AND r.average_stars>=@minStars");
+                sqlParams.Add("minStars", filter.MinStars);
             }
             if (filter.Genre != null)
             {
@@ -103,14 +103,14 @@ namespace DataAccess
         public async Task<MediaEntity?> FindMediaById(int id)
         {
             String sql = """
-                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_rating
+                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_stars
                 FROM media AS m
                 LEFT JOIN (
                     SELECT media_id, COALESCE(array_agg(genre_name),'{}') AS genres FROM genre_media
                     GROUP BY media_id
                     ) AS gm ON m.id=gm.media_id
                 LEFT JOIN (
-                    SELECT media_id, AVG(rating.rating) AS average_rating FROM rating
+                    SELECT media_id, AVG(rating.stars) AS average_stars FROM rating
                     GROUP BY media_id
                     ) AS r ON m.id=r.media_id
                 WHERE m.id=@media_id 
@@ -172,11 +172,11 @@ namespace DataAccess
                 };
                 var reader = await _postgres.SQLWithReturns(sql, sqlParams);
 
-                if (await reader.ReadAsync())
+                if (!await reader.ReadAsync())
                 {
-                    return reader.GetFieldValue<int?>(0);
+                    return null;
                 }
-                return null;
+                return reader.GetFieldValue<int?>(0);
             }
             catch
             {
@@ -192,46 +192,52 @@ namespace DataAccess
             if (media.Genres!=null)
             {
                 string genreSql = """
+
                     DELETE FROM genre_media
                     WHERE media_id=@media_id;
 
                     INSERT INTO genre_media (media_id, genre_name)
                     SELECT @media_id, unnest(@genre);
+
                     """;
                 sql.AppendLine(genreSql);
                 sqlParams.Add("genre", media.Genres);
             }
-            sql.AppendLine("""UPDATE media SET id=id""");
+            sql.Append("""
+                UPDATE media 
+                SET id=id
+                """);
             if (media.Title != null)
             {
-                sql.AppendLine(""", title=@title""");
+                sql.Append(",\ntitle=@title");
                 sqlParams.Add("title", media.Title);
             }
             if (media.Description != null)
             {
-                sql.AppendLine(""", description=@description""");
+                sql.Append(",\ndescription=@description");
                 sqlParams.Add("description", media.Description);
             }
             if (media.ReleaseDate != null)
             {
-                sql.AppendLine(""", release_date=@releaseDate""");
+                sql.Append(",\nrelease_date=@releaseDate");
                 sqlParams.Add("releaseDate", media.ReleaseDate);
             }
             if (media.Fsk != null)
             {
-                sql.AppendLine(""", fsk=@fsk""");
+                sql.Append(",\nfsk=@fsk");
                 sqlParams.Add("fsk", media.Fsk);
             }
             if (media.MediaType != null)
             {
-                sql.AppendLine(""", media_type=@mediaType""");
+                sql.Append(",\nmedia_type=@mediaType");
                 sqlParams.Add("mediaType", media.MediaType);
             }
             sql.AppendLine("""
+                
                 WHERE id=@media_id;
+
                 COMMIT;
                 """);
-            Console.WriteLine(sql.ToString());
             int changedRow=await _postgres.SQLWithoutReturns(sql.ToString(), sqlParams);
             return changedRow >= 1;
         }
@@ -240,10 +246,12 @@ namespace DataAccess
             try
             {
                 string sql = """
-                    WITH delete_genre AS (
-                        DELETE FROM genre_media WHERE media_id=@id
-                    )
-                    DELETE FROM media WHERE id=@id
+                    BEGIN;
+                    DELETE FROM favourite WHERE media_id=@id;
+                    DELETE FROM genre_media WHERE media_id=@id;
+                    DELETE FROM rating WHERE media_id=@id;
+                    DELETE FROM media WHERE id=@id;
+                    COMMIT;
                     """;
                 int changedRows = await _postgres.SQLWithoutReturns(sql, new Dictionary<string, object?> { ["id"] = id });
                 return changedRows >= 1;

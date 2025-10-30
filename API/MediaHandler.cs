@@ -37,7 +37,7 @@ namespace API
             var foundMedias = await _bl.MediaService.GetMedia(filter);
             foreach (var found in foundMedias)
             {
-                medias.Add(new MediaDTO(found.Id, found.Title, found.Description, found.AverageRating, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType));
+                medias.Add(new MediaDTO(found.Id, found.Title, found.Description, found.AverageStars, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType));
             }
             WriteJson(ctx, medias);
         }

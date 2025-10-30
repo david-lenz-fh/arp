@@ -1,5 +1,6 @@
 ﻿using BusinessLogic.Models;
 using DataAccess;
+using DataAccess.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +21,9 @@ namespace BusinessLogic
             _mediaService = mediaService;
         }
 
-        public async Task<List<Review>> GetReviewsFromUser(User user)
+        public async Task<List<Rating>> GetReviewsFromUser(User user)
         {
-            var re = new List<Review>();
+            var re = new List<Rating>();
             var found=await _dal.RatingRepo.GetRatingsForUser(user.Username);
             foreach (var rating in found)
             {
@@ -30,7 +31,7 @@ namespace BusinessLogic
                 if (media == null) {
                     continue;
                 }
-                re.Add(new Review(rating.Id, user, media, rating.Comment, rating.Rating));
+                re.Add(new Rating(rating.Id, user, media, rating.Comment, rating.Rating));
             }
             return re;
         }
@@ -49,6 +50,19 @@ namespace BusinessLogic
             }
             return re;
         }
+        public async Task<int?> PostRating(PostRating addRating)
+        {
+            return await _dal.RatingRepo.AddRating(new AddRating(addRating.Media.Id, addRating.User.Username, addRating.Comment, addRating.Stars));
+        }
 
+        public async Task<bool> Favourite(User user, Media media)
+        {
+            return await _dal.RatingRepo.Favourite(user.Username, media.Id);
+        }
+
+        public async Task<bool> Unfavourite(User user, Media media)
+        {
+            return await _dal.RatingRepo.Unfavourite(user.Username, media.Id);
+        }
     }
 }

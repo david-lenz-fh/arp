@@ -14,7 +14,7 @@ namespace DataAccess
 
         public async Task<RatingEntity?> FindRatingById(int id)
         {
-            string sql = "SELECT id, username, media_id, comment, rating FROM rating WHERE id=@id";
+            string sql = "SELECT id, username, media_id, comment, stars FROM rating WHERE id=@id";
             var sqlParams = new Dictionary<string, object?> { ["id"] = id };
             var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
             if(await reader.ReadAsync())
@@ -27,35 +27,35 @@ namespace DataAccess
         public async Task<int?> AddRating(AddRating added)
         {
             string sql = """
-                INSERT INTO rating (username, media_id, comment, rating) 
-                VALUES (@username, @media_id, @comment, @rating)
-                RETURNING id
+                INSERT INTO rating (username, media_id, comment, stars) 
+                VALUES (@username, @media_id, @comment, @stars)
+                RETURNING rating_id
                 """;
             var sqlParams = new Dictionary<string, object?> {
                 ["username"] = added.Username,
                 ["media_id"] = added.MediaId,
                 ["comment"] = added.Comment,
-                ["rating"] = added.Rating
+                ["stars"] = added.Stars
                 };
             var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
             if (!await reader.ReadAsync())
             {
                 return null;
             }
-            return reader.GetInt32(0);
+            return reader.GetFieldValue<int?>(0);
         }
         public async Task<bool> UpdateRating(UpdateRating updated)
         {
             string sql = """
                 UPDATE rating 
                 SET comment=COALESCE(@comment, comment),
-                    rating=COALESCE(@rating, rating)
+                    stars=COALESCE(@stars, stars)
                 WHERE id=@id
                 """;
 
             var sqlParams = new Dictionary<string, object?> { 
                 ["comment"] = updated.Comment, 
-                ["rating"] = updated.Rating, 
+                ["stars"] = updated.Stars, 
                 ["id"] = updated.Id
             };
             int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
@@ -100,7 +100,7 @@ namespace DataAccess
         {
             var re = new List<RatingEntity>();
                 string sql = """
-                SELECT rating_id, username, media_id, "comment", rating FROM rating 
+                SELECT rating_id, username, media_id, "comment", stars FROM rating 
                 WHERE username=@username
                 """;
             var sqlParams = new Dictionary<string, object?>

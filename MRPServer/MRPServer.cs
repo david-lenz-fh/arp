@@ -2,6 +2,7 @@
 using BusinessLogic;
 using System.Net;
 using System.Text;
+using System.Web;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace mrp
@@ -67,12 +68,12 @@ namespace mrp
                     {
                         ["rate"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
-                            ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                            ["POST"] = (ctx, parameters) => api.RatingHandler.PostRating(ctx, parameters)
                         }, null),
                         ["favorite"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
-                            ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, ""),
-                            ["DELETE"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                            ["POST"] = (ctx, parameters) => api.RatingHandler.Favourite(ctx, parameters),
+                            ["DELETE"] = (ctx, parameters) => api.RatingHandler.Unfavourite(ctx, parameters),
                         }, null)
                     })
                 }),
@@ -138,7 +139,7 @@ namespace mrp
                 currentRoute = routeNode;
                 if(parameter != null) 
                 {
-                    parameters[parameter.Value.Item1] = parameter.Value.Item2;
+                    parameters[parameter.Value.Item1] = HttpUtility.UrlDecode(parameter.Value.Item2);
                 }
             }
             if (currentRoute._routes == null)

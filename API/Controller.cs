@@ -30,7 +30,7 @@ namespace API
             ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
             ctx.Response.Close();
         }
-        public static Token? ReadBearerToken(HttpListenerContext ctx)
+        public static string? ReadBearerToken(HttpListenerContext ctx)
         {
             string token=ctx.Request.Headers["Authorization"]??"";
             int overheadSize = "Bearer ".Length;
@@ -39,7 +39,7 @@ namespace API
                 return null;
             }
             token = token.Substring(overheadSize);
-            return new Token(token);
+            return token;
         }
         public async static Task<T?> ReadJSONRequestAsync<T>(HttpListenerContext ctx)
         {
@@ -73,6 +73,31 @@ namespace API
                 }
             }
             return re;
+        }
+        public static void SendResultResponse(HttpListenerContext ctx, ResultResponse response)
+        {
+            HttpStatusCode httpCode;
+            switch (response.ResponseCode)
+            {
+                case BL_Response.InternalError:
+                case BL_Response.CorruptedData:
+                    httpCode = HttpStatusCode.InternalServerError;
+                    break;
+                case BL_Response.NotFound:
+                    httpCode = HttpStatusCode.NotFound;
+                    break;
+                case BL_Response.AuthenticationFailed:
+                case BL_Response.Unauthorized:
+                    httpCode = HttpStatusCode.Unauthorized;
+                    break;
+                case BL_Response.OK:
+                    httpCode = HttpStatusCode.OK;
+                    break;
+                default:
+                    httpCode = HttpStatusCode.InternalServerError;
+                    break;
+            }
+            SendEmptyStatus(ctx, httpCode, response.Message??"");
         }
     }
 }

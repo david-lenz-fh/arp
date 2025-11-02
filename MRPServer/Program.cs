@@ -19,7 +19,7 @@ class Program
 
         //Business Layer
         IUserService userService = new UserService(dal);
-        IMediaService mediaService = new MediaService(dal);
+        IMediaService mediaService = new MediaService(dal,userService);
         IRatingService ratingService = new RatingService(dal, mediaService, userService);
         IBL businessLayer = new BL(userService, mediaService, ratingService);
 

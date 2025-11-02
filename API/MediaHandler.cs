@@ -35,9 +35,14 @@ namespace API
 
             var medias = new List<MediaDTO>();
             var foundMedias = await _bl.MediaService.GetMedia(filter);
-            foreach (var found in foundMedias)
+            if (foundMedias.Value == null)
             {
-                medias.Add(new MediaDTO(found.Id, found.Title, found.Description, found.AverageStars, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType));
+                SendResultResponse(ctx,foundMedias.Response);
+                return;
+            }
+            foreach (var found in foundMedias.Value)
+            {
+                medias.Add(new MediaDTO(found.Id, found.Title, found.Description, found.AverageStars, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.Creator.Username));
             }
             WriteJson(ctx, medias);
         }
@@ -49,13 +54,15 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No valid mediaId was sent");
                 return;
             }
-            var found = await _bl.MediaService.FindMediaById(mediaId);
-            if (found==null)
+            var result = await _bl.MediaService.FindMediaById(mediaId);
+            if (result.Value==null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("Media with the ID: {0} not found", mediaId));
                 return;
             }
-            WriteJson(ctx, found);
+            var found = result.Value;
+            var media = new MediaDTO(found.Id, found.Title, found.Description, found.AverageStars, found.ReleaseDate, found.Fsk, found.Genres, found.MediaType, found.Creator.Username);
+            WriteJson(ctx, media);
         }
 
         public async Task DeleteMediaById(HttpListenerContext ctx, Dictionary<string, string> parameters)
@@ -66,12 +73,13 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No valid mediaId was sent");
                 return;
             }
-            if (!await _bl.MediaService.DeleteMediaById(mediaId))
+            string? token = ReadBearerToken(ctx);
+            if (token == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("Media with the ID: {0} could not be deleted", mediaId));
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No Authentication was send (Bearer Token)");
                 return;
             }
-            SendEmptyStatus(ctx, HttpStatusCode.OK, String.Format("Media with the ID: {0} was deleted", mediaId));
+            SendResultResponse(ctx, await _bl.MediaService.DeleteMediaById(token, mediaId));
         }
 
         public async Task PostMedia(HttpListenerContext ctx)
@@ -82,21 +90,33 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No valid media was sent");
                 return;
             }
+            var token = ReadBearerToken(ctx);
+            if (token == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "Authentication required for creating media");
+                return;
+            }
             DateOnly? release_date = null;
             if(DateOnly.TryParse(postedMedia.ReleaseYear + "-01-01", out DateOnly val)){
                 release_date = val;
             }
-            int? newId=await _bl.MediaService.PostMedia(new PostMedia(postedMedia.Title, postedMedia.Description, release_date,
+            var newId=await _bl.MediaService.PostMedia(token, new PostMedia(postedMedia.Title, postedMedia.Description, release_date,
                 postedMedia.AgeRestriction, postedMedia.Genres ?? new List<string>(), postedMedia.MediaType));
-            if (newId == null)
+            if (newId.Value == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt add media");
+                SendResultResponse(ctx, newId.Response);
                 return;
             }
-            WriteJson(ctx, new { MediaId = newId});
+            WriteJson(ctx, new { MediaId = newId.Value});
         }
         public async Task PutMedia(HttpListenerContext ctx, Dictionary<string,string> parameters)
         {
+            var token = ReadBearerToken(ctx);
+            if (token == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "Authentication required for creating media");
+                return;
+            }
             string? mediaIdString = parameters.GetValueOrDefault("mediaId");
             if (mediaIdString == null||!int.TryParse(mediaIdString, out int mediaId))
             {
@@ -114,14 +134,9 @@ namespace API
             {
                 release_date = val;
             }
-
-            if(!await _bl.MediaService.PutMedia(
-                new PutMedia(mediaId, putMedia.Title, putMedia.Description, release_date, putMedia.AgeRestriction, putMedia.Genres, putMedia.MediaType)))
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt change media");
-                return;
-            }
-            SendEmptyStatus(ctx, HttpStatusCode.OK, "Media was changed");
+            SendResultResponse(ctx, await _bl.MediaService.PutMedia(token, new PutMedia(
+                mediaId, putMedia.Title, putMedia.Description, release_date, putMedia.AgeRestriction, putMedia.Genres, putMedia.MediaType)
+            ));
         }
     }
 }

@@ -82,7 +82,7 @@ namespace mrp
                     ["{ratingId}"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                     {
                         ["DELETE"] = (ctx, parameters) => api.RatingHandler.DeleteRating(ctx, parameters),
-                        ["PUT"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                        ["PUT"] = (ctx, parameters) => api.RatingHandler.PutRating(ctx, parameters)
                     }, new Dictionary<string, RoutingNode>
                     {
                         ["like"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>

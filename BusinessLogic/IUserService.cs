@@ -5,11 +5,10 @@ namespace BusinessLogic
 {
     public interface IUserService
     {
-        public Task<Token?> Login(Login credentials);
-        public Task<Token?> Register(Login credentials);
-        public Task<User?> GetUserByToken(string token);
-        public Task<User?> FindUserByName(string username);
-        public Task<bool> UpdateUser(User updatedUser);
-        public Task<User?> GetUserFromToken(Token? token);
+        public Task<Result<string>> Login(Login credentials);
+        public Task<Result<string>> Register(Login credentials);
+        public Task<Result<User>> AuthenticateUserByToken(string authenticationToken);
+        public Task<Result<User>> FindUserByName(string username);
+        public Task<ResultResponse> UpdateProfile(string authenticationToken, Profile updatedProfile);
     }
 }

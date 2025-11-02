@@ -24,15 +24,15 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Login Information was send");
                 return;
             }            
-            Token? token = await _bl.UserService.Login(new Login(login.Username, login.Password));
-            if (token == null)
+            var token = await _bl.UserService.Login(new Login(login.Username, login.Password));
+            if (token.Value == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized,"Couldn't authenticate");
+                SendResultResponse(ctx, token.Response);
                 return;
             }
             ctx.Response.StatusCode = (int)HttpStatusCode.OK;
             ctx.Response.StatusDescription = "Login successfull";
-            WriteJson<Token>(ctx, token);
+            WriteJson(ctx, new { Token = token.Value });
         }
         public async Task Register(HttpListenerContext ctx)
         {
@@ -42,15 +42,15 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No User Information");
                 return;
             }
-            Token? token=await _bl.UserService.Register(new Login(registrationData.Username, registrationData.Password));
-            if (token == null)
+            var token=await _bl.UserService.Register(new Login(registrationData.Username, registrationData.Password));
+            if (token.Value == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Error creating Account");
+                SendResultResponse(ctx, token.Response);
                 return;
             }
             ctx.Response.StatusCode = (int)HttpStatusCode.Created;
             ctx.Response.StatusDescription = "User Registered";
-            WriteJson<Token>(ctx, token);
+            WriteJson(ctx, new { Token = token.Value });
         }
         
 
@@ -63,22 +63,23 @@ namespace API
                 return;
             }
             username = HttpUtility.UrlDecode(username);
-            User? foundUser = await _bl.UserService.FindUserByName(username);
-            if(foundUser == null)
+            var foundUser = await _bl.UserService.FindUserByName(username);
+            if(foundUser.Value == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("User \"{0}\" not found", username));
+                SendResultResponse(ctx, foundUser.Response);
                 return;
             }
-            var profile = new ProfileDTO(foundUser.Email, foundUser.FavouriteGenre);
+            var profile = new ProfileDTO(foundUser.Value.Email, foundUser.Value.FavouriteGenre);
             WriteJson<ProfileDTO>(ctx, profile);
         }
         public async Task UpdateUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
-            User? authenticatedUser = await _bl.UserService.GetUserFromToken(ReadBearerToken(ctx));
-            if (authenticatedUser == null)
+            string? token = ReadBearerToken(ctx);
+            if (token == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "Authentication failed");
+                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No Bearer Token");
                 return;
+
             }
             ProfileDTO? updateProfile = await ReadJSONRequestAsync<ProfileDTO>(ctx);
             if (updateProfile == null)
@@ -92,26 +93,7 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No username");
                 return;
             }
-            username = HttpUtility.UrlDecode(username);
-            User? foundUser = await _bl.UserService.FindUserByName(username);
-            if (foundUser == null)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("User \"{0}\" not found", username));
-                return;
-            }
-            if (foundUser.Username != authenticatedUser.Username)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "You have not authorization to change this profile");
-                return;
-            }
-            var updateUser = new User(foundUser.Username, foundUser.Password, updateProfile.Email, updateProfile.FavouriteGenre);
-            bool wasUpdated = await _bl.UserService.UpdateUser(updateUser);
-            if (!wasUpdated) 
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt update User Profile");
-                return;
-            }
-            SendEmptyStatus(ctx, HttpStatusCode.OK, "User profile was successfully updated");
+            SendResultResponse(ctx, await _bl.UserService.UpdateProfile(token, new Profile(updateProfile.Email, updateProfile.FavouriteGenre)));
         }
     }    
 }

@@ -14,7 +14,7 @@ namespace DataAccess
         {
             
             StringBuilder sql=new StringBuilder("""
-                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_stars
+                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_stars, m.creator
                 FROM media AS m
                 LEFT JOIN (
                     SELECT media_id, COALESCE(array_agg(genre_name),'{}') AS genres FROM genre_media
@@ -95,15 +95,16 @@ namespace DataAccess
                 List<string> genres = reader.IsDBNull(5) ? new List<string>() : reader.GetFieldValue<string[]>(5).ToList();
                 string? mediaType = reader.IsDBNull(6)?null: reader.GetString(6);
                 double? averageRating = reader.IsDBNull(7) ? null : reader.GetDouble(7);
+                string creatorName = reader.GetString(8);
 
-                re.Add(new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres, mediaType,averageRating));
+                re.Add(new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres, mediaType, averageRating, creatorName));
             }
             return re;
         }
         public async Task<MediaEntity?> FindMediaById(int id)
         {
             String sql = """
-                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_stars
+                SELECT m.id, m.title, m.description, m.release_date, m.fsk, gm.genres, m.media_type, r.average_stars, m.creator
                 FROM media AS m
                 LEFT JOIN (
                     SELECT media_id, COALESCE(array_agg(genre_name),'{}') AS genres FROM genre_media
@@ -130,8 +131,9 @@ namespace DataAccess
                 List<string> genres = reader.IsDBNull(5) ? new List<string>() : reader.GetFieldValue<string[]>(5).ToList();
                 string? mediaType = reader.IsDBNull(6) ? null : reader.GetString(6);
                 double? averageRating = reader.IsDBNull(7) ? null : reader.GetDouble(7);
+                string creatorName = reader.GetString(8);
 
-                return new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres, mediaType, averageRating);
+                return new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres, mediaType, averageRating,creatorName);
             }
             return null;
         }
@@ -152,8 +154,8 @@ namespace DataAccess
             {
                 string sql = """
                     WITH new_media AS (
-                        INSERT INTO media (title, description, release_date, fsk, media_type)
-                        VALUES (@name, @description, @release_date, @fsk, @media_type)
+                        INSERT INTO media (title, description, release_date, fsk, media_type, creator)
+                        VALUES (@name, @description, @release_date, @fsk, @media_type, @creatorName)
                         RETURNING id
                     )
                     INSERT INTO genre_media (media_id, genre_name)
@@ -161,14 +163,15 @@ namespace DataAccess
                     CROSS JOIN unnest(@genres) AS g(genre)
                     RETURNING media_id
                     """;
-                var sqlParams = new Dictionary<string, object?> 
-                { 
-                    ["name"] = media.Title, 
-                    ["description"] = media.Description, 
-                    ["release_date"] = media.ReleaseDate, 
-                    ["fsk"]=media.Fsk, 
-                    ["media_type"]=media.MediaType, 
-                    ["genres"] = media.GenreNames.ToArray()
+                var sqlParams = new Dictionary<string, object?>
+                {
+                    ["name"] = media.Title,
+                    ["description"] = media.Description,
+                    ["release_date"] = media.ReleaseDate,
+                    ["fsk"] = media.Fsk,
+                    ["media_type"] = media.MediaType,
+                    ["genres"] = media.GenreNames.ToArray(),
+                    ["creatorName"] = media.CreatorName
                 };
                 var reader = await _postgres.SQLWithReturns(sql, sqlParams);
 

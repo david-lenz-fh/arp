@@ -21,53 +21,154 @@ namespace BusinessLogic
             _mediaService = mediaService;
         }
 
-        public async Task<List<Rating>> GetReviewsFromUser(User user)
+        public async Task<Result<List<Rating>>> GetRatingsFromUser(string username)
         {
-            var re = new List<Rating>();
-            var found=await _dal.RatingRepo.GetRatingsForUser(user.Username);
+            var returnValue = new List<Rating>();
+            var user = await _userService.FindUserByName(username);
+            if (user.Value == null)
+            {
+                return new Result<List<Rating>>(null, user.Response);
+            }
+            var found=await _dal.RatingRepo.GetRatingsForUser(username);
             foreach (var rating in found)
             {
                 var media=await _mediaService.FindMediaById(rating.MediaId);
-                if (media == null) {
+                if (media.Value == null) {
                     continue;
                 }
-                re.Add(new Rating(rating.Id, user, media, rating.Comment, rating.Rating));
+                returnValue.Add(new Rating(rating.Id, user.Value, media.Value, rating.Comment, rating.Stars));
             }
-            return re;
+            return new Result<List<Rating>>(returnValue, new ResultResponse(BL_Response.OK, null));
         }
-        public async Task<List<Favourite>> GetFavouritesFromUser(User user)
+        public async Task<Result<List<Favourite>>> GetFavouritesFromUser(string username)
         {
-            var re = new List<Favourite>();
-            var found = await _dal.RatingRepo.GetFavourites(user.Username);
+            var returnValue = new List<Favourite>(); 
+            var user = await _userService.FindUserByName(username);
+            if (user.Value == null)
+            {
+                return new Result<List<Favourite>>(null, user.Response);
+            }
+            var found = await _dal.RatingRepo.GetFavourites(username);
             foreach (var favourite in found)
             {
                 var media = await _mediaService.FindMediaById(favourite.MediaId);
-                if (media == null)
+                if (media.Value == null)
                 {
                     continue;
                 }
-                re.Add(new Favourite(user, media));
+                returnValue.Add(new Favourite(user.Value, media.Value));
             }
-            return re;
+            return new Result<List<Favourite>>(returnValue, new ResultResponse(BL_Response.OK, null));
         }
-        public async Task<int?> PostRating(PostRating addRating)
+        public async Task<Result<int?>> PostRating(string authenticationToken, PostRating addRating)
         {
-            return await _dal.RatingRepo.AddRating(new AddRating(addRating.Media.Id, addRating.User.Username, addRating.Comment, addRating.Stars));
+            if (addRating.Stars > 5 || addRating.Stars < 1)
+            {
+                return new Result<int?>(null, new ResultResponse(BL_Response.BadParameters, "Stars must be between 5 and 1"));
+            }
+            var user = await _userService.AuthenticateUserByToken(authenticationToken);
+            if (user.Value == null) {
+                return new Result<int?>(null, user.Response);
+            }
+            var returnValue = await _dal.RatingRepo.AddRating(new AddRating(addRating.MediaId, user.Value.Username, addRating.Comment, addRating.Stars));
+            if(returnValue == null)
+            {
+                return new Result<int?>(returnValue, new ResultResponse(BL_Response.InternalError, "Couldnt Post"));
+            }
+            return new Result<int?>(returnValue, new ResultResponse(BL_Response.OK, "Rating was created"));
         }
 
-        public async Task<bool> Favourite(User user, Media media)
+        public async Task<ResultResponse> Favourite(string authenticationToken, int mediaId)
         {
-            return await _dal.RatingRepo.Favourite(user.Username, media.Id);
+            var user = await _userService.AuthenticateUserByToken(authenticationToken);
+            if (user.Value == null) {
+                return user.Response;
+            }
+            if(!await _dal.RatingRepo.Favourite(user.Value.Username, mediaId)){
+                return new ResultResponse(BL_Response.InternalError, "Couldnt favourite");
+            }
+            return new ResultResponse(BL_Response.OK, "favourited");
         }
 
-        public async Task<bool> Unfavourite(User user, Media media)
+        public async Task<ResultResponse> Unfavourite(string authenticationToken, int mediaId)
         {
-            return await _dal.RatingRepo.Unfavourite(user.Username, media.Id);
+            var user = await _userService.AuthenticateUserByToken(authenticationToken);
+            if (user.Value == null)
+            {
+                return user.Response;
+            }
+            if (!await _dal.RatingRepo.Unfavourite(user.Value.Username, mediaId))
+            {
+                return new ResultResponse(BL_Response.InternalError, "Couldnt unfavourite");
+            }
+            return new ResultResponse(BL_Response.OK, "unfavourited");
         }
 
-        public async Task<bool> DeleteRatingById(int id)
+        public async Task<ResultResponse> DeleteRatingById(string authenticationToken, int id)
         {
-            return await _dal.RatingRepo.DeleteRatingById(id);
+            var user = await _userService.AuthenticateUserByToken(authenticationToken);
+            if(user.Value == null)
+            {
+                return user.Response;
+            }
+            var rating = await FindRatingById(id);
+            if(rating.Value == null)
+            {
+                return rating.Response;
+            }
+            if (user.Value.Username != rating.Value.User.Username)
+            {
+                return new ResultResponse(BL_Response.Unauthorized,"Not the author of this rating");
+            }
+            if(!await _dal.RatingRepo.DeleteRatingById(id))
+            {
+                return new ResultResponse(BL_Response.InternalError, "Couldnt delete rating");
+            }
+            return new ResultResponse(BL_Response.OK, "rating deleted");
+        }
+
+        public async Task<ResultResponse> PutRating(string authenticationToken, PutRating updatedRating)
+        {
+            var user = await _userService.AuthenticateUserByToken(authenticationToken);
+            if (user.Value == null)
+            {
+                return user.Response;
+            }
+            var rating = await FindRatingById(updatedRating.RatingId);
+            if (rating.Value == null)
+            {
+                return rating.Response;
+            }
+            if(user.Value.Username != rating.Value.User.Username)
+            {
+                return new ResultResponse(BL_Response.Unauthorized,"Not the author of this rating");
+            }
+            if (!await _dal.RatingRepo.UpdateRating(new UpdateRating(updatedRating.RatingId, updatedRating.Comment, updatedRating.Stars)))
+            {
+                return new ResultResponse(BL_Response.InternalError, "Couldnt update rating");
+            }
+            return new ResultResponse(BL_Response.OK, "rating updated");
+        }
+        
+        public async Task<Result<Rating>> FindRatingById(int id)
+        {
+            var found=await _dal.RatingRepo.FindRatingById(id);
+            if(found == null)
+            {
+                return new Result<Rating>(null, new ResultResponse(BL_Response.NotFound, "Rating not found"));
+            }
+            var user = await _userService.FindUserByName(found.Username);
+            if (user.Value == null)
+            {
+                return new Result<Rating>(null, new ResultResponse(BL_Response.CorruptedData, "Corrupted Data"));
+            }
+            var media = await _mediaService.FindMediaById(found.MediaId);
+            if(media.Value == null)
+            {
+                return new Result<Rating>(null, new ResultResponse(BL_Response.CorruptedData, "Corrupted Data"));
+            }
+            var returnValue = new Rating(found.Id, user.Value, media.Value, found.Comment, found.Stars);
+            return new Result<Rating>(returnValue, new ResultResponse(BL_Response.OK, null));
         }
     }
 }

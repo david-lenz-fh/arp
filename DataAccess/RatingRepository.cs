@@ -14,7 +14,7 @@ namespace DataAccess
 
         public async Task<RatingEntity?> FindRatingById(int id)
         {
-            string sql = "SELECT id, username, media_id, comment, stars FROM rating WHERE id=@id";
+            string sql = "SELECT rating_id, username, media_id, comment, stars FROM rating WHERE rating_id=@id";
             var sqlParams = new Dictionary<string, object?> { ["id"] = id };
             var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
             if(await reader.ReadAsync())
@@ -50,7 +50,7 @@ namespace DataAccess
                 UPDATE rating 
                 SET comment=COALESCE(@comment, comment),
                     stars=COALESCE(@stars, stars)
-                WHERE id=@id
+                WHERE rating_id=@id
                 """;
 
             var sqlParams = new Dictionary<string, object?> { 
@@ -118,8 +118,9 @@ namespace DataAccess
             while (await reader.ReadAsync())
             {
                 string? comment = reader.IsDBNull(3) ? null : reader.GetString(3);
-                int? rating = reader.IsDBNull(4) ? null : reader.GetInt32(4);
-                re.Add(new RatingEntity(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2), comment, rating));
+                int stars = reader.GetInt32(4);
+
+                re.Add(new RatingEntity(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2), comment, stars));
             }
             return re;
         }

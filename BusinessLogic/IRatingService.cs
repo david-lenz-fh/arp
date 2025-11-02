@@ -1,15 +1,19 @@
 ﻿using BusinessLogic.Models;
+using DataAccess.Entities;
+using System.Net;
 
 namespace BusinessLogic
 {
     public interface IRatingService
     {
-        public Task<List<Rating>> GetReviewsFromUser(User user);
-        public Task<List<Favourite>> GetFavouritesFromUser(User user);
-        public Task<int?> PostRating(PostRating addRating);
-        public Task<bool> DeleteRatingById(int id);
-        public Task<bool> Favourite(User user, Media media);
-        public Task<bool> Unfavourite(User user, Media media);
+        public Task<Result<List<Rating>>> GetRatingsFromUser(string username);
+        public Task<Result<List<Favourite>>> GetFavouritesFromUser(string username);
+        public Task<Result<int?>> PostRating(string authenticationToken, PostRating addRating);
+        public Task<ResultResponse> PutRating(string authenticationToken, PutRating updatedRating);
+        public Task<ResultResponse> DeleteRatingById(string authenticationToken, int id);
+        public Task<Result<Rating>> FindRatingById(int id);
+        public Task<ResultResponse> Favourite(string authenticationToken, int mediaId);
+        public Task<ResultResponse> Unfavourite(string authenticationToken, int mediaId);
 
     }
-}
+}   

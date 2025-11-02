@@ -19,21 +19,16 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No User Id");
                 return;
             }
-            User? foundUser = await _bl.UserService.FindUserByName(username);
-            if (foundUser == null)
+            var foundRatings = await _bl.RatingService.GetRatingsFromUser(username);
+            var ratings = new List<RatingDTO>();
+            if (foundRatings.Value == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("User \"{0}\" not found", username));
+                SendResultResponse(ctx, foundRatings.Response);
                 return;
             }
-            var foundRatings = await _bl.RatingService.GetReviewsFromUser(foundUser);
-            var ratings = new List<RatingDTO>();
-            foreach (var found in foundRatings)
+            foreach (var found in foundRatings.Value)
             {
                 ratings.Add(new RatingDTO(found.Id, found.User.Username, new RatingMediaDTO(found.Media.Id, found.Media.Title??""), found.Comment, found.Stars));
-            }
-            if (ratings.Count == 0) {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, "No User Reviews found");
-                return;
             }
             WriteJson(ctx, ratings);
         }
@@ -45,24 +40,17 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No User Id");
                 return;
             }
-            User? foundUser = await _bl.UserService.FindUserByName(username);
-            if (foundUser == null)
+            var foundFavourites=await _bl.RatingService.GetFavouritesFromUser(username);
+            if (foundFavourites.Value == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, String.Format("User \"{0}\" not found", username));
+                SendResultResponse(ctx, foundFavourites.Response);
                 return;
             }
-
-            var foundFavourites=await _bl.RatingService.GetFavouritesFromUser(foundUser);
             var favourites = new List<FavouriteDTO>();
-            foreach (var found in foundFavourites)
+            foreach (var found in foundFavourites.Value)
             {
                 favourites.Add(new FavouriteDTO(found.user.Username,
                     new FavouriteMediaDTO(found.media.Id, found.media.Title, found.media.ReleaseDate, found.media.MediaType)));
-            }
-            if (favourites.Count == 0)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, "No User Favourites found");
-                return;
             }
             WriteJson(ctx, favourites);
         }
@@ -74,35 +62,29 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No MediaId");
                 return;
             }
+            string? token=ReadBearerToken(ctx);
+            if (token == null) {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
+                return;
+            }
             var postedRating = await ReadJSONRequestAsync<AddRatingDTO>(ctx);
             if (postedRating == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "Wrong Request JSON");
                 return;
             }
-            Token? token=ReadBearerToken(ctx);
-            if (token == null) {
-                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
-                return;
-            }
-            User? user=await _bl.UserService.GetUserFromToken(token);
-            if (user == null)
+            if (postedRating.Stars == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No user with this authentication found");
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Stars in Rating");
                 return;
             }
-            Media? media=await _bl.MediaService.FindMediaById(mediaId);
-            if (media == null) {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, "No Media with this Id");
-                return;
-            }
-            int? id = await _bl.RatingService.PostRating(new PostRating(user, media, postedRating.Comment, postedRating.Stars));
-            if (id == null)
+            var id = await _bl.RatingService.PostRating(token, new PostRating(mediaId, postedRating.Comment, postedRating.Stars.Value));
+            if (id.Value == null)
             {
-                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt add rating");
+                SendResultResponse(ctx, id.Response);
                 return;
             }
-            WriteJson(ctx, new {ratingId=id});
+            WriteJson(ctx, new {ratingId=id.Value});
         }
         public async Task DeleteRating(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
@@ -113,25 +95,13 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No MediaId");
                 return;
             }
-            /*
-            Token? token = ReadBearerToken(ctx);
+            string? token = ReadBearerToken(ctx);
             if (token == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
                 return;
             }
-            User? user = await _bl.UserService.GetUserFromToken(token);
-            if (user == null)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No user with this authentication found");
-                return;
-            }*/
-            if (!await _bl.RatingService.DeleteRatingById(ratingId))
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt Delete Rating");
-                return;
-            }
-            SendEmptyStatus(ctx, HttpStatusCode.OK, "Deleted rating");  
+            SendResultResponse(ctx, await _bl.RatingService.DeleteRatingById(token, ratingId));
         }
         public async Task Favourite(HttpListenerContext ctx, Dictionary<string,string> parameters)
         {
@@ -141,30 +111,13 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No MediaId");
                 return;
             }
-            Token? token = ReadBearerToken(ctx);
+            string? token = ReadBearerToken(ctx);
             if (token == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
                 return;
             }
-            User? user = await _bl.UserService.GetUserFromToken(token);
-            if (user == null)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No user with this authentication found");
-                return;
-            }
-            Media? media = await _bl.MediaService.FindMediaById(mediaId);
-            if (media == null)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, "No Media with this Id");
-                return;
-            }
-            if (!await _bl.RatingService.Favourite(user, media))
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt favourite");
-                return;
-            }
-            SendEmptyStatus(ctx, HttpStatusCode.OK, "Favourited");
+            SendResultResponse(ctx, await _bl.RatingService.Favourite(token, mediaId));
         }
         public async Task Unfavourite(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
@@ -174,31 +127,37 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No MediaId");
                 return;
             }
-            Token? token = ReadBearerToken(ctx);
+            string? token = ReadBearerToken(ctx);
             if (token == null)
             {
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
                 return;
             }
-            User? user = await _bl.UserService.GetUserFromToken(token);
-            if (user == null)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.Unauthorized, "No user with this authentication found");
-                return;
-            }
-            Media? media = await _bl.MediaService.FindMediaById(mediaId);
-            if (media == null)
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.NotFound, "No Media with this Id");
-                return;
-            }
-            if(!await _bl.RatingService.Unfavourite(user, media))
-            {
-                SendEmptyStatus(ctx, HttpStatusCode.InternalServerError, "Couldnt unfavourite");
-                return;
-            }
-            SendEmptyStatus(ctx, HttpStatusCode.OK, "Unfavourited");
+            SendResultResponse(ctx, await _bl.RatingService.Unfavourite(token, mediaId));
         }
 
+        public async Task PutRating(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
+            string? ratingIdString = parameters.GetValueOrDefault("ratingId");
+            if (ratingIdString == null || !int.TryParse(ratingIdString, out int ratingId))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No ratingId");
+                return;
+            }
+
+            string? token = ReadBearerToken(ctx);
+            if (token == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
+                return;
+            }
+            var putRating = await ReadJSONRequestAsync<AddRatingDTO>(ctx);
+            if (putRating == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Request Body");
+                return;
+            }
+            SendResultResponse(ctx, await _bl.RatingService.PutRating(token, new PutRating(ratingId, putRating.Comment, putRating.Stars)));
+        }
     }
 }

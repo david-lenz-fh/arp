@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BusinessLogic
 {
@@ -21,13 +22,22 @@ namespace BusinessLogic
             _mediaService = mediaService;
         }
 
-        public async Task<Result<List<Rating>>> GetRatingsFromUser(string username)
+        public async Task<Result<List<Rating>>> GetRatingsFromUser(string username, string? authenticationToken)
         {
             var returnValue = new List<Rating>();
             var user = await _userService.FindUserByName(username);
             if (user.Value == null)
             {
                 return new Result<List<Rating>>(null, user.Response);
+            }
+            bool isAuthenticated = false;
+            if (authenticationToken != null)
+            {
+                var authenticatedUser = await _userService.AuthenticateUserByToken(authenticationToken);
+                if (authenticatedUser.Value != null && authenticatedUser.Value.Username == user.Value.Username)
+                {
+                    isAuthenticated = true;
+                }
             }
             var found=await _dal.RatingRepo.GetRatingsForUser(username);
             foreach (var rating in found)
@@ -36,7 +46,9 @@ namespace BusinessLogic
                 if (media.Value == null) {
                     continue;
                 }
-                returnValue.Add(new Rating(rating.Id, user.Value, media.Value, rating.Comment, rating.Stars));
+                string? comment=rating.Confirmed||isAuthenticated ? rating.Comment : null;
+                
+                returnValue.Add(new Rating(rating.Id, user.Value, media.Value, comment, rating.Stars, rating.TimeStamp));
             }
             return new Result<List<Rating>>(returnValue, new ResultResponse(BL_Response.OK, null));
         }
@@ -143,7 +155,7 @@ namespace BusinessLogic
             {
                 return new ResultResponse(BL_Response.Unauthorized,"Not the author of this rating");
             }
-            if (!await _dal.RatingRepo.UpdateRating(new UpdateRating(updatedRating.RatingId, updatedRating.Comment, updatedRating.Stars)))
+            if (!await _dal.RatingRepo.UpdateRating(new UpdateRating(updatedRating.RatingId, updatedRating.Comment, updatedRating.Stars, null)))
             {
                 return new ResultResponse(BL_Response.InternalError, "Couldnt update rating");
             }
@@ -167,8 +179,33 @@ namespace BusinessLogic
             {
                 return new Result<Rating>(null, new ResultResponse(BL_Response.CorruptedData, "Corrupted Data"));
             }
-            var returnValue = new Rating(found.Id, user.Value, media.Value, found.Comment, found.Stars);
+            string? comment = found.Confirmed ? found.Comment : null;
+
+            var returnValue = new Rating(found.Id, user.Value, media.Value, comment, found.Stars, found.TimeStamp);
             return new Result<Rating>(returnValue, new ResultResponse(BL_Response.OK, null));
+        }
+
+        public async Task<ResultResponse> ConfirmComment(string authenticationToken, int ratingId)
+        {
+            var user = await _userService.AuthenticateUserByToken(authenticationToken);
+            if (user.Value == null)
+            {
+                return user.Response;
+            }
+            var rating = await FindRatingById(ratingId);
+            if (rating.Value == null)
+            {
+                return rating.Response;
+            }
+            if (user.Value.Username != rating.Value.User.Username)
+            {
+                return new ResultResponse(BL_Response.Unauthorized, "Not the author of this rating");
+            }
+            if (!await _dal.RatingRepo.UpdateRating(new UpdateRating(ratingId,null, null, true)))
+            {
+                return new ResultResponse(BL_Response.InternalError, "Could not confirm the comment");
+            }
+            return new ResultResponse(BL_Response.OK, "Comment comfirmed");
         }
     }
 }

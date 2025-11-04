@@ -14,29 +14,38 @@ namespace DataAccess
 
         public async Task<RatingEntity?> FindRatingById(int id)
         {
-            string sql = "SELECT rating_id, username, media_id, comment, stars FROM rating WHERE rating_id=@id";
+            string sql = "SELECT rating_id, username, media_id, comment, stars, confirmed, timestamp FROM rating WHERE rating_id=@id";
             var sqlParams = new Dictionary<string, object?> { ["id"] = id };
             var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
             if(await reader.ReadAsync())
             {
-                return new RatingEntity(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2),
-                                        reader.GetString(3), reader.GetInt32(4));
+                int ratingId = reader.GetInt32(0);
+                string username = reader.GetString(1);
+                int mediaId = reader.GetInt32(2);
+                string? comment = reader.IsDBNull(3) ? null : reader.GetString(3);
+                int stars = reader.GetInt32(4);
+                bool confirmed = reader.GetBoolean(5);
+                DateTime? timestamp = reader.IsDBNull(6)?null: reader.GetDateTime(6);
+
+                return new RatingEntity(ratingId, username, mediaId, comment, stars, confirmed, timestamp);
             }
             return null;
         }
         public async Task<int?> AddRating(AddRating added)
         {
             string sql = """
-                INSERT INTO rating (username, media_id, comment, stars) 
-                VALUES (@username, @media_id, @comment, @stars)
+                INSERT INTO rating (username, media_id, comment, stars, confirmed, timestamp) 
+                VALUES (@username, @media_id, @comment, @stars, false, @timestamp)
                 RETURNING rating_id
                 """;
-            var sqlParams = new Dictionary<string, object?> {
+            var sqlParams = new Dictionary<string, object?>
+            {
                 ["username"] = added.Username,
                 ["media_id"] = added.MediaId,
                 ["comment"] = added.Comment,
-                ["stars"] = added.Stars
-                };
+                ["stars"] = added.Stars,
+                ["timestamp"] = DateTime.UtcNow
+            };
             var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
             if (!await reader.ReadAsync())
             {
@@ -49,13 +58,15 @@ namespace DataAccess
             string sql = """
                 UPDATE rating 
                 SET comment=COALESCE(@comment, comment),
-                    stars=COALESCE(@stars, stars)
+                    stars=COALESCE(@stars, stars),
+                    confirmed=COALESCE(@confirmed, confirmed)
                 WHERE rating_id=@id
                 """;
 
             var sqlParams = new Dictionary<string, object?> { 
                 ["comment"] = updated.Comment, 
-                ["stars"] = updated.Stars, 
+                ["stars"] = updated.Stars,
+                ["confirmed"] = updated.Confirmed,
                 ["id"] = updated.Id
             };
             int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
@@ -107,7 +118,7 @@ namespace DataAccess
         {
             var re = new List<RatingEntity>();
                 string sql = """
-                SELECT rating_id, username, media_id, "comment", stars FROM rating 
+                SELECT rating_id, media_id, "comment", stars, confirmed, timestamp FROM rating 
                 WHERE username=@username
                 """;
             var sqlParams = new Dictionary<string, object?>
@@ -117,10 +128,13 @@ namespace DataAccess
             var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
             while (await reader.ReadAsync())
             {
-                string? comment = reader.IsDBNull(3) ? null : reader.GetString(3);
-                int stars = reader.GetInt32(4);
-
-                re.Add(new RatingEntity(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2), comment, stars));
+                int ratingId = reader.GetInt32(0);
+                int mediaId = reader.GetInt32(1);
+                string? comment = reader.IsDBNull(2) ? null : reader.GetString(2);
+                int stars = reader.GetInt32(3);
+                bool confirmed = reader.GetBoolean(4);
+                DateTime? timestamp = reader.IsDBNull(5) ? null : reader.GetDateTime(5);
+                re.Add(new RatingEntity(ratingId, username, mediaId , comment, stars, confirmed, timestamp));
             }
             return re;
         }

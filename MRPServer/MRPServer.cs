@@ -91,7 +91,7 @@ namespace mrp
                         }, null),
                         ["confirm"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
-                            ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                            ["POST"] = (ctx, parameters) => api.RatingHandler.ConfirmComment(ctx, parameters)
                         }, null),
                     })
                 }),

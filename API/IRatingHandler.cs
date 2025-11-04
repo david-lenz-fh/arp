@@ -12,6 +12,7 @@ namespace API
         public Task GetUserRatings(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task GetUserFavourites(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task PostRating(HttpListenerContext ctx, Dictionary<string, string> parameters);
+        public Task ConfirmComment(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task DeleteRating(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task PutRating(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task Favourite(HttpListenerContext ctx, Dictionary<string, string> parameters);

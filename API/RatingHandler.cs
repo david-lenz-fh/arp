@@ -19,7 +19,8 @@ namespace API
                 SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No User Id");
                 return;
             }
-            var foundRatings = await _bl.RatingService.GetRatingsFromUser(username);
+            string? token = ReadBearerToken(ctx);
+            var foundRatings = await _bl.RatingService.GetRatingsFromUser(username, token);
             var ratings = new List<RatingDTO>();
             if (foundRatings.Value == null)
             {
@@ -28,7 +29,7 @@ namespace API
             }
             foreach (var found in foundRatings.Value)
             {
-                ratings.Add(new RatingDTO(found.Id, found.User.Username, new RatingMediaDTO(found.Media.Id, found.Media.Title??""), found.Comment, found.Stars));
+                ratings.Add(new RatingDTO(found.Id, found.User.Username, new RatingMediaDTO(found.Media.Id, found.Media.Title??""), found.Comment, found.Stars, found.Timestamp));
             }
             WriteJson(ctx, ratings);
         }
@@ -158,6 +159,23 @@ namespace API
                 return;
             }
             SendResultResponse(ctx, await _bl.RatingService.PutRating(token, new PutRating(ratingId, putRating.Comment, putRating.Stars)));
+        }
+
+        public async Task ConfirmComment(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
+            string? ratingIdString = parameters.GetValueOrDefault("ratingId");
+            if (ratingIdString == null || !int.TryParse(ratingIdString, out int ratingId))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Rating ID");
+                return;
+            }
+            string? token = ReadBearerToken(ctx);
+            if (token == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
+                return;
+            }
+            SendResultResponse(ctx, await _bl.RatingService.ConfirmComment(token, ratingId));
         }
     }
 }

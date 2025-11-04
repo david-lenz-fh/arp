@@ -13,7 +13,7 @@ namespace BusinessLogic.Models
     public record PutMedia(int Id, string? Title, string? Description, DateOnly? ReleaseDate, int? Fsk, List<string>? Genres, string? MediaType);
     public record Login(string Username, string Password);
     public record MediaType(int Id, string Name);
-    public record Rating(int Id, User User, Media Media, string? Comment, int Stars);
+    public record Rating(int Id, User User, Media Media, string? Comment, int Stars, DateTime? Timestamp);
     public record PutRating(int RatingId, string? Comment, int? Stars);
     public record PostRating(int MediaId, string? Comment, int Stars);
     public record Favourite(User user, Media media);

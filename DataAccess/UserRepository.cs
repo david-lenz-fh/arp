@@ -21,79 +21,58 @@ namespace DataAccess
                 ["username"] = username
             };
             var reader = await _postgres.SQLWithReturns(sql, sqlParams);
-            if (await reader.ReadAsync())
+            if (reader == null || !await reader.ReadAsync())
             {
-                string? email = reader.IsDBNull(2) ? null : reader.GetString(2);
-                string? favouriteGenre = reader.IsDBNull(3) ? null : reader.GetString(3);
-                return new UserEntity(reader.GetString(0), reader.GetString(1),email,favouriteGenre);
+                return null;
             }
-            return null;
+            string? email = reader.IsDBNull(2) ? null : reader.GetString(2);
+            string? favouriteGenre = reader.IsDBNull(3) ? null : reader.GetString(3);
+            return new UserEntity(reader.GetString(0), reader.GetString(1),email,favouriteGenre); 
         }
         public async Task<bool> AddUser(UserEntity user)
         {
-            try
+            string sql = """
+                INSERT INTO mrp_user (username, password) 
+                VALUES (@name, @pwd)
+                """;
+            var sqlParams = new Dictionary<string, object?>
             {
-                string sql = """
-                    INSERT INTO mrp_user (username, password) 
-                    VALUES (@name, @pwd)
-                    """;
-                var sqlParams=new Dictionary<string, object?> { 
-                    ["name"] = user.Username, 
-                    ["pwd"] = user.Password 
-                };
-                var changedRows = await _postgres.SQLWithoutReturns(sql, sqlParams);
+                ["name"] = user.Username,
+                ["pwd"] = user.Password
+            };
+            var changedRows = await _postgres.SQLWithoutReturns(sql, sqlParams);
 
-                return changedRows > 0;
-            }
-            catch
-            {
-                return false;
-            }
+            return changedRows > 0;
         }
         public async Task<bool> DeleteUser(string username)
         {
-            try
-            {
-                string sql = """
-                    DELETE FROM mrp_user 
-                    WHERE username=@username
-                    """;
-                var sqlParams = new Dictionary<string, object?> { 
-                    ["username"] = username
-                };
-                int changedRow=await _postgres.SQLWithoutReturns(sql, sqlParams);
-                return changedRow > 0;
-                
-            }
-            catch
-            {
-                return false;
-            }
+            string sql = """
+                DELETE FROM mrp_user 
+                WHERE username=@username
+                """;
+            var sqlParams = new Dictionary<string, object?> { 
+                ["username"] = username
+            };
+            int changedRow=await _postgres.SQLWithoutReturns(sql, sqlParams);
+            return changedRow > 0;
         }
         public async Task<bool> UpdateUser(UserEntity updated)
         {
-            try
+            string sql = """
+                UPDATE mrp_user 
+                SET password = @password, email=@email, favourite_genre_name=@favouriteGenre
+                WHERE username = @username
+                """;
+            var sqlParams = new Dictionary<string, object?>
             {
-                string sql = """
-                    UPDATE mrp_user 
-                    SET password = @password, email=@email, favourite_genre_name=@favouriteGenre
-                    WHERE username = @username
-                    """;
-                var sqlParams = new Dictionary<string, object?>
-                {
-                    ["username"] = updated.Username,
-                    ["password"] = updated.Password,
-                    ["favouriteGenre"] = updated.FavouriteGenre,
-                    ["email"] = updated.Email
-                };
+                ["username"] = updated.Username,
+                ["password"] = updated.Password,
+                ["favouriteGenre"] = updated.FavouriteGenre,
+                ["email"] = updated.Email
+            };
 
-                int changedRow = await _postgres.SQLWithoutReturns(sql, sqlParams);
-                return changedRow > 0;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+            int changedRow = await _postgres.SQLWithoutReturns(sql, sqlParams);
+            return changedRow > 0;
+         }
     }
 }

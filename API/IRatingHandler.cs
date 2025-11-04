@@ -17,5 +17,6 @@ namespace API
         public Task PutRating(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task Favourite(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task Unfavourite(HttpListenerContext ctx, Dictionary<string, string> parameters);
+        public Task LikeRating(HttpListenerContext ctx, Dictionary<string, string> parameters);
     }
 }

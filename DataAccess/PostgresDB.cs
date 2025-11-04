@@ -24,19 +24,26 @@ namespace DataAccess
                 }
                 return await sql.ExecuteNonQueryAsync();
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return -1;
             }
         }
-        public async Task<NpgsqlDataReader> SQLWithReturns(string prepared_sql, Dictionary<string, object?> values)
+        public async Task<NpgsqlDataReader?> SQLWithReturns(string prepared_sql, Dictionary<string, object?> values)
         {
-            await using var sql = _dataSource.CreateCommand(prepared_sql);
-            foreach (var kv in values)
+            try
             {
-                sql.Parameters.AddWithValue(kv.Key, kv.Value ?? DBNull.Value);
+                await using var sql = _dataSource.CreateCommand(prepared_sql);
+                foreach (var kv in values)
+                {
+                    sql.Parameters.AddWithValue(kv.Key, kv.Value ?? DBNull.Value);
+                }
+                return await sql.ExecuteReaderAsync();
             }
-            return await sql.ExecuteReaderAsync();
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 }

@@ -82,6 +82,7 @@ namespace BusinessLogic
             if (user.Value == null) {
                 return new Result<int?>(null, user.Response);
             }
+            
             var returnValue = await _dal.RatingRepo.AddRating(new AddRating(addRating.MediaId, user.Value.Username, addRating.Comment, addRating.Stars));
             if(returnValue == null)
             {
@@ -206,6 +207,20 @@ namespace BusinessLogic
                 return new ResultResponse(BL_Response.InternalError, "Could not confirm the comment");
             }
             return new ResultResponse(BL_Response.OK, "Comment comfirmed");
+        }
+
+        public async Task<ResultResponse> LikeRating(string authenticationToken, int ratingId)
+        {
+            var user = await _userService.AuthenticateUserByToken(authenticationToken);
+            if (user.Value == null)
+            {
+                return user.Response;
+            }
+            if (!await _dal.RatingRepo.LikeRating(user.Value.Username, ratingId))
+            {
+                return new ResultResponse(BL_Response.InternalError, "Couldnt Like Rating");
+            }
+            return new ResultResponse(BL_Response.OK, null);
         }
     }
 }

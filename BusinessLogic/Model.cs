@@ -30,5 +30,4 @@ namespace BusinessLogic.Models
         BadParameters,
         CorruptedData
     }
-
 }

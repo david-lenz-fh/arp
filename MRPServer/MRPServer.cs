@@ -87,7 +87,7 @@ namespace mrp
                     {
                         ["like"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {
-                            ["POST"] = (ctx, parameters) => Controller.SendEmptyStatus(ctx, HttpStatusCode.NotImplemented, "")
+                            ["POST"] = (ctx, parameters) => api.RatingHandler.LikeRating(ctx, parameters),
                         }, null),
                         ["confirm"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                         {

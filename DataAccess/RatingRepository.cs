@@ -17,19 +17,20 @@ namespace DataAccess
             string sql = "SELECT rating_id, username, media_id, comment, stars, confirmed, timestamp FROM rating WHERE rating_id=@id";
             var sqlParams = new Dictionary<string, object?> { ["id"] = id };
             var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
-            if(await reader.ReadAsync())
+            if (reader == null || await reader.ReadAsync())
             {
-                int ratingId = reader.GetInt32(0);
-                string username = reader.GetString(1);
-                int mediaId = reader.GetInt32(2);
-                string? comment = reader.IsDBNull(3) ? null : reader.GetString(3);
-                int stars = reader.GetInt32(4);
-                bool confirmed = reader.GetBoolean(5);
-                DateTime? timestamp = reader.IsDBNull(6)?null: reader.GetDateTime(6);
-
-                return new RatingEntity(ratingId, username, mediaId, comment, stars, confirmed, timestamp);
+                return null;
             }
-            return null;
+            int ratingId = reader.GetInt32(0);
+            string username = reader.GetString(1);
+            int mediaId = reader.GetInt32(2);
+            string? comment = reader.IsDBNull(3) ? null : reader.GetString(3);
+            int stars = reader.GetInt32(4);
+            bool confirmed = reader.GetBoolean(5);
+            DateTime? timestamp = reader.IsDBNull(6)?null: reader.GetDateTime(6);
+
+            return new RatingEntity(ratingId, username, mediaId, comment, stars, confirmed, timestamp);
+            
         }
         public async Task<int?> AddRating(AddRating added)
         {
@@ -47,7 +48,7 @@ namespace DataAccess
                 ["timestamp"] = DateTime.UtcNow
             };
             var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
-            if (!await reader.ReadAsync())
+            if (reader == null || !await reader.ReadAsync())
             {
                 return null;
             }
@@ -126,7 +127,7 @@ namespace DataAccess
                 ["username"] = username
             };
             var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
-            while (await reader.ReadAsync())
+            while (reader != null && await reader.ReadAsync())
             {
                 int ratingId = reader.GetInt32(0);
                 int mediaId = reader.GetInt32(1);
@@ -151,11 +152,26 @@ namespace DataAccess
                 ["username"] = username
             };
             var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
-            while (await reader.ReadAsync())
+            while (reader!=null && await reader.ReadAsync())
             {
                 re.Add(new FavouriteEntity(username, reader.GetInt32(0)));
             }
             return re;
+        }
+
+        public async Task<bool> LikeRating(string username, int ratingId)
+        {
+            string sql = """
+                INSERT INTO rating_likes (username, rating_id)
+                VALUES (@username, @rating_id)
+                """;
+            var sqlParams = new Dictionary<string, object?>
+            {
+                ["username"] = username,
+                ["rating_id"] = ratingId
+            };
+            int changedRows = await _postgres_db.SQLWithoutReturns(sql, sqlParams);
+            return changedRows > 0;
         }
     }
 }

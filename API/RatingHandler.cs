@@ -177,5 +177,22 @@ namespace API
             }
             SendResultResponse(ctx, await _bl.RatingService.ConfirmComment(token, ratingId));
         }
+
+        public async Task LikeRating(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
+            string? token=ReadBearerToken(ctx);
+            if (token == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Token was send");
+                return;
+            }
+            string? ratingIdString = parameters.GetValueOrDefault("ratingId");
+            if (ratingIdString == null || !int.TryParse(ratingIdString, out int ratingId))
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No Rating ID");
+                return;
+            }
+            SendResultResponse(ctx, await _bl.RatingService.LikeRating(token, ratingId));
+        }
     }
 }

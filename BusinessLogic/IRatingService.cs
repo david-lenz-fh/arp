@@ -15,6 +15,7 @@ namespace BusinessLogic
         public Task<Result<Rating>> FindRatingById(int id);
         public Task<ResultResponse> Favourite(string authenticationToken, int mediaId);
         public Task<ResultResponse> Unfavourite(string authenticationToken, int mediaId);
+        public Task<ResultResponse> LikeRating(string authenticationToken, int ratingId);
 
     }
 }   

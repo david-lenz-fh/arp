@@ -17,7 +17,7 @@ namespace DataAccess
         public Task<bool> Favourite(string username, int mediaId);
         public Task<bool> Unfavourite(string username, int mediaId);
         public Task<List<FavouriteEntity>> GetFavourites(string username);
-
+        public Task<bool> LikeRating(string username, int ratingId);
 
     }
 }

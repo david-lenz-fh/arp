@@ -16,6 +16,5 @@ namespace DataAccess
         public Task<int?> AddMedia(AddMedia media);
         public Task<bool> UpdateMedia(UpdateMedia media);
         public Task<bool> DeleteMedia(int id);
-
     }
 }

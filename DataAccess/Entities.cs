@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DataAccess.Entities
 {
     public record UserEntity(string Username, string Password, string? Email, string? FavouriteGenre);
-    public record MediaEntity(int Id, string? Title, string? Description, DateOnly? ReleaseDate, int? Fsk, List<string> Genres, string? MediaType, double? AverageStars, string CreatorName);
+    public record MediaEntity(int Id, string? Title, string? Description, DateOnly? ReleaseDate, int? Fsk, List<string> Genres, string? MediaType, decimal? AverageStars, string CreatorName);
     public record RatingEntity(int Id, string Username, int MediaId, string? Comment, int Stars, bool Confirmed, DateTime? TimeStamp);
     public record FavouriteEntity(string Username, int MediaId);
     public record UpdateMedia(int Id, string? Title, string? Description, DateOnly? ReleaseDate, int? Fsk, List<string>? Genres, string? MediaType);
@@ -15,5 +15,5 @@ namespace DataAccess.Entities
     public record AddRating(int MediaId, string Username, string? Comment, int? Stars);
     public record UpdateRating(int Id,string? Comment, int? Stars, bool? Confirmed);
     public record MediaFilterDAL(string? Title, string? MediaType, int? ReleaseYear, string? Genre, int? Fsk, int? MinStars, string? SortBy);
-    
+    public record UserActivity(string Username, int ActivityPoints);
 }

@@ -95,5 +95,21 @@ namespace API
             }
             SendResultResponse(ctx, await _bl.UserService.UpdateProfile(token, new Profile(updateProfile.Email, updateProfile.FavouriteGenre)));
         }
+
+        public async Task GetLeaderboard(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
+            var leaderboard=await _bl.UserService.Leaderboard();
+            if (leaderboard.Value == null)
+            {
+                SendResultResponse(ctx, leaderboard.Response);
+                return;
+            }
+            var re = new List<UserRankDTO>();
+            foreach(var userRank in leaderboard.Value)
+            {
+                re.Add(new UserRankDTO(userRank.Placement, userRank.Score, userRank.Username));
+            }
+            WriteJson(ctx, re);
+        }
     }    
 }

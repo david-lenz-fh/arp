@@ -8,7 +8,7 @@ namespace DataAccess
         private PostgresDB(NpgsqlDataSource dataSource) {
             _dataSource = dataSource;
         }
-        public static PostgresDB Initialize(){
+        public static PostgresDB Initialize()   {
             var dataSource = NpgsqlDataSource.Create(connectionString);
 
             return new PostgresDB(dataSource);

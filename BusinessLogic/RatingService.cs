@@ -88,6 +88,7 @@ namespace BusinessLogic
             {
                 return new Result<int?>(returnValue, new ResultResponse(BL_Response.InternalError, "Couldnt Post"));
             }
+            await _dal.UserRepo.AddActivityPoints(user.Value.Username, 3);
             return new Result<int?>(returnValue, new ResultResponse(BL_Response.OK, "Rating was created"));
         }
 
@@ -100,6 +101,7 @@ namespace BusinessLogic
             if(!await _dal.RatingRepo.Favourite(user.Value.Username, mediaId)){
                 return new ResultResponse(BL_Response.InternalError, "Couldnt favourite");
             }
+            await _dal.UserRepo.AddActivityPoints(user.Value.Username, 1);
             return new ResultResponse(BL_Response.OK, "favourited");
         }
 
@@ -220,6 +222,7 @@ namespace BusinessLogic
             {
                 return new ResultResponse(BL_Response.InternalError, "Couldnt Like Rating");
             }
+            await _dal.UserRepo.AddActivityPoints(user.Value.Username, 1);
             return new ResultResponse(BL_Response.OK, null);
         }
     }

@@ -14,5 +14,7 @@ namespace DataAccess
         public Task<bool> AddUser(UserEntity user);
         public Task<bool> DeleteUser(string username);
         public Task<bool> UpdateUser(UserEntity updated);
+        public Task<bool> AddActivityPoints(string username, int points);
+        public Task<List<UserActivity>> GetLeaderboard(int topXusers);
     }
 }

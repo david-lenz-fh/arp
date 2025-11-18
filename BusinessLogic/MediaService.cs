@@ -56,11 +56,15 @@ namespace BusinessLogic
             }
             return new ResultResponse(BL_Response.OK, "Media deleted");
         }
-        public async Task<Result<List<Media>>> GetMedia(MediaFilter filter)
+        public async Task<Result<List<Media>>> GetMedia(MediaFilter? filter)
         {
-            var returnValue=new List<Media>();
-            var foundMedias = await _dal.MediaRepo.GetMedia(
-                new MediaFilterDAL(filter.Title, filter.MediaType, filter.ReleaseYear, filter.Genre, filter.Fsk, filter.MinStars, filter.SortBy));
+            MediaFilterDAL filterDAL = filter == null ? new MediaFilterDAL(null,null,null,null,null,null,null) :
+                new MediaFilterDAL(filter.Title, filter.MediaType, filter.ReleaseYear, filter.Genre, filter.Fsk, filter.MinStars, filter.SortBy);
+
+
+            var returnValue =new List<Media>();
+            var foundMedias = await _dal.MediaRepo.GetMedia(filterDAL);
+                
             foreach (var found in foundMedias)
             {
                 var foundUser = await _dal.UserRepo.FindUserByName(found.CreatorName);
@@ -87,6 +91,7 @@ namespace BusinessLogic
             {
                 return new Result<int?>(null, new ResultResponse(BL_Response.NotFound, "Resource not found"));
             }
+            await _dal.UserRepo.AddActivityPoints(user.Value.Username, 3);
             return new Result<int?>(returnValue, new ResultResponse(BL_Response.OK, "Media created"));
         }
         public async Task<ResultResponse> PutMedia(string authenticationToken, PutMedia putMedia)
@@ -110,6 +115,7 @@ namespace BusinessLogic
             {
                 return new ResultResponse(BL_Response.InternalError, "Couldnt update media");
             }
+            await _dal.UserRepo.AddActivityPoints(user.Value.Username, 1);
             return new ResultResponse(BL_Response.OK, "Media changed");
         }
     }

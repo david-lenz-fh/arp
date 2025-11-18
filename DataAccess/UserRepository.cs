@@ -74,5 +74,42 @@ namespace DataAccess
             int changedRow = await _postgres.SQLWithoutReturns(sql, sqlParams);
             return changedRow > 0;
          }
+
+        public async Task<bool> AddActivityPoints(string username, int points)
+        {
+            string sql = """
+                UPDATE mrp_user 
+                SET activity_points = activity_points+@activity_points
+                WHERE username = @username
+                """;
+            var sqlParams = new Dictionary<string, object?>
+            {
+                ["username"] = username,
+                ["activity_points"] = points
+            };
+            int changedRow = await _postgres.SQLWithoutReturns(sql, sqlParams);
+            return changedRow > 0;
+        }
+
+        public async Task<List<UserActivity>> GetLeaderboard(int topXusers)
+        {
+            var leaderboard=new List<UserActivity>();
+            string sql = """
+                SELECT username, activity_points FROM mrp_user 
+                ORDER BY activity_points DESC
+                LIMIT @top_x
+                """;
+            var sqlParams = new Dictionary<string, object?>
+            {
+                ["top_x"] = topXusers
+            };
+
+            var reader = await _postgres.SQLWithReturns(sql, sqlParams); 
+            while (reader != null && await reader.ReadAsync())
+            {
+                leaderboard.Add(new UserActivity(reader.GetString(0), reader.GetInt32(1)));
+            }
+            return leaderboard;
+        }
     }
 }

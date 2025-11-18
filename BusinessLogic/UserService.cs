@@ -124,6 +124,19 @@ namespace BusinessLogic
             }
             return new ResultResponse(BL_Response.OK, "User was updated");
         }
+        public async Task<Result<List<UserRank>>> Leaderboard()
+        {
+            int topX = 10;
+            var re=new List<UserRank>();
+            var leaderboard = await _dal.UserRepo.GetLeaderboard(topX);
+            int placement = 1;
+            foreach (var rank in leaderboard)
+            {
+                re.Add(new UserRank(placement, rank.ActivityPoints, rank.Username));
+                placement++;
+            }
+            return new Result<List<UserRank>>(re, new ResultResponse(BL_Response.OK, null));
+        }
         private static long GetValidTimeStamp()
         {
             return DateTime.Now.Add(TimeSpan.FromSeconds(7200)).Ticks;
@@ -143,7 +156,6 @@ namespace BusinessLogic
                 return builder.ToString();
             }
         }
-
 
     }
 }

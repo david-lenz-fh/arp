@@ -88,13 +88,13 @@ namespace DataAccess
             var reader = await _postgres.SQLWithReturns(sql.ToString(), sqlParams);
             while (reader != null && await reader.ReadAsync())
             {
-                string? title = reader.IsDBNull(1)?null: reader.GetString(1);
+                string? title = reader.IsDBNull(1) ? null: reader.GetString(1);
                 string? description = reader.IsDBNull(2) ? null : reader.GetString(2);
                 DateOnly? release = reader.IsDBNull(3) ? null : reader.GetFieldValue<DateOnly>(3);
                 int? fsk = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                 List<string> genres = reader.IsDBNull(5) ? new List<string>() : reader.GetFieldValue<string[]>(5).ToList();
-                string? mediaType = reader.IsDBNull(6)?null: reader.GetString(6);
-                double? averageRating = reader.IsDBNull(7) ? null : reader.GetDouble(7);
+                string? mediaType = reader.IsDBNull(6) ? null: reader.GetString(6);
+                decimal? averageRating = reader.IsDBNull(7) ? null : reader.GetDecimal(7);
                 string creatorName = reader.GetString(8);
 
                 re.Add(new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres, mediaType, averageRating, creatorName));
@@ -132,7 +132,7 @@ namespace DataAccess
             int? fsk = reader.IsDBNull(4) ? null : reader.GetInt32(4);
             List<string> genres = reader.IsDBNull(5) ? new List<string>() : reader.GetFieldValue<string[]>(5).ToList();
             string? mediaType = reader.IsDBNull(6) ? null : reader.GetString(6);
-            double? averageRating = reader.IsDBNull(7) ? null : reader.GetDouble(7);
+            decimal? averageRating = reader.IsDBNull(7) ? null : reader.GetDecimal(7);
             string creatorName = reader.GetString(8);
 
             return new MediaEntity(reader.GetInt32(0), title, description, release, fsk, genres, mediaType, averageRating,creatorName);

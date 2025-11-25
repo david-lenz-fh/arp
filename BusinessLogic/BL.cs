@@ -1,4 +1,5 @@
-﻿using DataAccess;
+﻿using BusinessLogic.BusinessLogic;
+using DataAccess;
 
 namespace BusinessLogic
 {
@@ -7,11 +8,13 @@ namespace BusinessLogic
         public IUserService UserService { get; }
         public IMediaService MediaService { get; }
         public IRatingService RatingService { get; }
-        public BL(IUserService userService, IMediaService mediaService, IRatingService ratingService)
+        public IRecommendationService RecommendationService { get; }
+        public BL(IUserService userService, IMediaService mediaService, IRatingService ratingService, IRecommendationService recommendationService)
         {
             UserService = userService;
             MediaService = mediaService;
             RatingService = ratingService;
+            RecommendationService = recommendationService; 
         }
     }
 }

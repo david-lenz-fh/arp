@@ -64,7 +64,7 @@ namespace BusinessLogic
 
             var returnValue =new List<Media>();
             var foundMedias = await _dal.MediaRepo.GetMedia(filterDAL);
-                
+            //eig besser als sql join
             foreach (var found in foundMedias)
             {
                 var foundUser = await _dal.UserRepo.FindUserByName(found.CreatorName);

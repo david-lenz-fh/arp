@@ -2,6 +2,7 @@
 using System.Text;
 using API;
 using BusinessLogic;
+using BusinessLogic.BusinessLogic;
 using DataAccess;
 using mrp;
 
@@ -21,7 +22,8 @@ class Program
         IUserService userService = new UserService(dal);
         IMediaService mediaService = new MediaService(dal,userService);
         IRatingService ratingService = new RatingService(dal, mediaService, userService);
-        IBL businessLayer = new BL(userService, mediaService, ratingService);
+        IRecommendationService recommendationService = new RecommendationService(dal, mediaService, userService, ratingService);
+        IBL businessLayer = new BL(userService, mediaService, ratingService, recommendationService);
 
         //API Layer
         IRatingHandler ratingHandler = new RatingHandler(businessLayer);

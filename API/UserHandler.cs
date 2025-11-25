@@ -111,5 +111,27 @@ namespace API
             }
             WriteJson(ctx, re);
         }
+        public async Task GetRecommendations(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        {
+            string? username = parameters.GetValueOrDefault("userId");
+            if (username == null)
+            {
+                SendEmptyStatus(ctx, HttpStatusCode.BadRequest, "No username");
+                return;
+            }
+            var recommendedMedia=await _bl.RecommendationService.GetRecommendations(username);
+            if (recommendedMedia.Value == null) {
+                SendResultResponse(ctx, recommendedMedia.Response);
+                return;
+            }
+            var recommendationResponse = new List<RecommendationDTO>();
+            foreach(var rm in recommendedMedia.Value)
+            {
+                var media = new MediaDTO(rm.Item1.Id, rm.Item1.Title, rm.Item1.Description, rm.Item1.AverageStars, rm.Item1.ReleaseDate, rm.Item1.Fsk, rm.Item1.Genres, rm.Item1.MediaType, rm.Item1.Creator.Username);
+                RecommendationDTO addRecommendation = new RecommendationDTO(media, rm.Item2);
+                recommendationResponse.Add(addRecommendation);
+            }
+            WriteJson(ctx, recommendationResponse);
+        }
     }    
 }

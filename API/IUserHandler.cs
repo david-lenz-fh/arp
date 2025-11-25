@@ -14,6 +14,7 @@ namespace API
         public Task GetUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task UpdateUserProfile(HttpListenerContext ctx, Dictionary<string, string> parameters);
         public Task GetLeaderboard(HttpListenerContext ctx, Dictionary<string, string> parameters);
+        public Task GetRecommendations(HttpListenerContext ctx, Dictionary<string, string> parameters);
 
     }
 }

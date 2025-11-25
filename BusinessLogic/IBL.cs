@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BusinessLogic.BusinessLogic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,7 @@ namespace BusinessLogic
         public IUserService UserService { get; }
         public IMediaService MediaService { get; }
         public IRatingService RatingService { get; }
+        public IRecommendationService RecommendationService { get; }
     }
 }
+

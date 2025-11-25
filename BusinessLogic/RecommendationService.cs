@@ -24,10 +24,10 @@ namespace BusinessLogic
                 _ratingService = ratingService;
             }
             
-            public async Task<Result<List<(Media, decimal)>>> GetRecommendations(string authenticationToken)
+            public async Task<Result<List<(Media, decimal)>>> GetRecommendations(string username)
             {
                 List<(Media, decimal)> recommendationScores = new List<(Media, decimal)>();
-                var user = await _userService.AuthenticateUserByToken(authenticationToken);
+                var user = await _userService.FindUserByName(username);
                 if (user.Value == null)
                 {
                     return new Result<List<(Media, decimal)>>(null, user.Response);
@@ -45,7 +45,7 @@ namespace BusinessLogic
                     return new Result<List<(Media, decimal)>>(null, ratingsResult.Response);
                 }
 
-                List<Media> unratedMedia = allMedia.Where(rm => !ratingsResult.Value.Select(r => r.Id).Contains(rm.Id)).ToList();
+                List<Media> unratedMedia = allMedia.Where(m => !ratingsResult.Value.Select(r => r.Media.Id).Contains(m.Id)).ToList();
                 foreach (var media in unratedMedia)
                 {
                     List<decimal> similarityScores = new List<decimal>();

@@ -24,7 +24,7 @@ namespace BusinessLogic
             {
                 secretPrivateKey=sha256.ComputeHash(Encoding.UTF8.GetBytes("MeinGeheimToken"));
             }
-}
+        }
         public async Task<Result<string>> Login(Login credentials)
         {
             string hashed=Hash(credentials.Password);

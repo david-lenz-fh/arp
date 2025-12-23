@@ -5,7 +5,7 @@ using DataAccess.Entities;
 
 namespace Unit_Test
 {
-    public class MediaServiceTests
+    public class MediaServiceTest
     {
         private MediaService _mediaService;
         [SetUp]
@@ -123,7 +123,7 @@ namespace Unit_Test
             Assert.That(response.ResponseCode == BL_Response.NotFound);
         }
         [Test]
-        public async Task Update_Media_With_Valid_Token_Of_Someone_Not_The_Media_owner_And_Existing_Id()
+        public async Task Update_Media_With_Valid_Token_Of_Someone_Not_The_Media_Owner_And_Existing_Id()
         {
             PutMedia media = new PutMedia(1, "TestNewMedia", null, null, null, new List<string>(), null);
             string validTokenOfSomeoneElse = "token2";
@@ -131,7 +131,7 @@ namespace Unit_Test
             Assert.That(response.ResponseCode == BL_Response.Unauthorized);
         }
         [Test]
-        public async Task Update_Media_With_Valid_Token_Of_Someone_Not_The_Media_owner_And_Not_Existing_Id()
+        public async Task Update_Media_With_Valid_Token_Of_Someone_Not_The_Media_Owner_And_Not_Existing_Id()
         {
             PutMedia media = new PutMedia(4, "TestNewMedia", null, null, null, new List<string>(), null);
             string validTokenOfSomeoneElse = "token2";

@@ -145,7 +145,7 @@ namespace Unit_Test
         {
             if(id == 0)
             {
-                Task.FromResult<RatingEntity?>(new RatingEntity(0, "TestUser", 1, "WOOW", 4, false, null));
+                return Task.FromResult<RatingEntity?>(new RatingEntity(0, "TestUser", 1, "WOOW", 4, false, null));
             }
             return Task.FromResult<RatingEntity?>(null);
         }
@@ -200,7 +200,7 @@ namespace Unit_Test
     {
         public IUserService UserService => new UserServiceMocked();
 
-        public IMediaService MediaService => throw new NotImplementedException();
+        public IMediaService MediaService => new MediaServiceMocked();
 
         public IRatingService RatingService => throw new NotImplementedException();
 
@@ -260,6 +260,69 @@ namespace Unit_Test
                 return Task.FromResult(new ResultResponse(BL_Response.OK, null));
             }
             return Task.FromResult(new ResultResponse(BL_Response.AuthenticationFailed, null));
+        }
+    }
+    class MediaServiceMocked() : IMediaService
+    {
+        public Task<ResultResponse> DeleteMediaById(string authenticationToken, int id)
+        {
+            if (authenticationToken != "token2" && authenticationToken!="token")
+            {
+                return Task.FromResult(new ResultResponse(BL_Response.AuthenticationFailed,null));
+            }
+            if (authenticationToken == "token" && id == 1)
+            {
+                return Task.FromResult(new ResultResponse(BL_Response.OK, null));
+            }
+            if (authenticationToken == "token2" && id == 1)
+            {
+                return Task.FromResult(new ResultResponse(BL_Response.Unauthorized, null));
+            }
+            return Task.FromResult(new ResultResponse(BL_Response.NotFound, null));
+        }
+
+        public Task<Result<Media>> FindMediaById(int id)
+        {
+            if(id == 1)
+            {
+                return Task.FromResult(new Result<Media>(
+                    new Media(1, "TestMedia", "Just to test", null, null, new List<string>(), null, 4.2m, new User("TestUser", "TestPasswort", null, null)), 
+                    new ResultResponse(BL_Response.OK, null)));
+            }
+            return Task.FromResult(new Result<Media>(null, new ResultResponse(BL_Response.NotFound, null)));
+        }
+
+        public Task<Result<List<Media>>> GetMedia(MediaFilter? filter)
+        {            
+            return Task.FromResult(new Result<List<Media>>(
+                new List<Media>{ new Media(1, "TestMedia", "Just to test", null, null, new List<string>(), null, 4.2m, new User("TestUser", "TestPasswort", null, null))}, 
+                new ResultResponse(BL_Response.OK, null)));
+        }
+
+        public Task<Result<int?>> PostMedia(string authenticationToken, PostMedia newMedia)
+        {
+            if(authenticationToken == "token")
+            {
+                return Task.FromResult(new Result<int?>(2, new ResultResponse(BL_Response.OK, null)));
+            }
+            return Task.FromResult(new Result<int?>(null, new ResultResponse(BL_Response.AuthenticationFailed, null)));
+        }
+
+        public Task<ResultResponse> PutMedia(string authenticationToken, PutMedia putMedia)
+        {
+            if (authenticationToken != "token2" && authenticationToken != "token")
+            {
+                return Task.FromResult(new ResultResponse(BL_Response.AuthenticationFailed, null));
+            }
+            if (authenticationToken == "token" && putMedia.Id == 1)
+            {
+                return Task.FromResult(new ResultResponse(BL_Response.OK, null));
+            }
+            if (authenticationToken == "token2" && putMedia.Id == 1)
+            {
+                return Task.FromResult(new ResultResponse(BL_Response.Unauthorized, null));
+            }
+            return Task.FromResult(new ResultResponse(BL_Response.NotFound, null));
         }
     }
 }

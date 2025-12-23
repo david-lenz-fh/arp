@@ -1,5 +1,4 @@
-﻿using BusinessLogic.BusinessLogic;
-using DataAccess;
+﻿using DataAccess;
 
 namespace BusinessLogic
 {

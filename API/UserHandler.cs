@@ -96,7 +96,7 @@ namespace API
             SendResultResponse(ctx, await _bl.UserService.UpdateProfile(token, new Profile(updateProfile.Email, updateProfile.FavouriteGenre)));
         }
 
-        public async Task GetLeaderboard(HttpListenerContext ctx, Dictionary<string, string> parameters)
+        public async Task GetLeaderboard(HttpListenerContext ctx)
         {
             var leaderboard=await _bl.UserService.Leaderboard();
             if (leaderboard.Value == null)

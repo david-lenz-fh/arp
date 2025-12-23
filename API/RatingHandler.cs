@@ -6,11 +6,8 @@ using System.Web;
 
 namespace API
 {
-    public class RatingHandler : Controller, IRatingHandler
+    public class RatingHandler(IBL bl) : Controller(bl), IRatingHandler
     {
-        public RatingHandler(IBL bl) : base(bl)
-        {
-        }
         public async Task GetUserRatings(HttpListenerContext ctx, Dictionary<string, string> parameters)
         {
             string? username = parameters.GetValueOrDefault("userId");

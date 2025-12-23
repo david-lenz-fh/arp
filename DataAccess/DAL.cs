@@ -7,17 +7,10 @@ using System.Threading.Tasks;
 
 namespace DataAccess
 {
-    public class DAL:IDAL
+    public class DAL(IMediaRepository mediaRepo, IUserRepository userRepo, IRatingRepository ratingRepo) : IDAL
     {
-        public IMediaRepository MediaRepo { get; }
-        public IUserRepository UserRepo { get; }
-        public IRatingRepository RatingRepo { get; }
-
-        public DAL(IMediaRepository mediaRepo, IUserRepository userRepo, IRatingRepository ratingRepo)
-        {
-            MediaRepo = mediaRepo;
-            UserRepo = userRepo;
-            RatingRepo = ratingRepo;
-        }
+        public IMediaRepository MediaRepo { get; } = mediaRepo;
+        public IUserRepository UserRepo { get; } = userRepo;
+        public IRatingRepository RatingRepo { get; } = ratingRepo;
     }
 }

@@ -2,9 +2,8 @@
 using System.Text;
 using API;
 using BusinessLogic;
-using BusinessLogic.BusinessLogic;
+using MRPServer;
 using DataAccess;
-using mrp;
 
 
 class Program
@@ -12,7 +11,7 @@ class Program
     static void Main(string[] args)
     {
         //Data Access Layer
-        PostgresDB postgresDB = PostgresDB.Initialize();
+        PostgresDB postgresDB = PostgresDB.Initialize("Host=localhost;Port=5432;Username=postgres;Password=1234;Database=mrp_db;");
         IMediaRepository mediaRepository = new MediaRepository(postgresDB);
         IRatingRepository ratingRepository = new RatingRepository(postgresDB);
         IUserRepository userRepository = new UserRepository(postgresDB);
@@ -32,7 +31,7 @@ class Program
         IAPI api = new API.API(userHandler, mediaHandler, ratingHandler);
 
         //Server
-        MRPServer mrp = new MRPServer(api);
+        MRPServer.MRPServer mrp = new MRPServer.MRPServer(api);
         mrp.Listen();
     }
 }

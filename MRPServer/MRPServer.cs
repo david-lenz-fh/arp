@@ -5,22 +5,20 @@ using System.Text;
 using System.Web;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace mrp
+namespace MRPServer
 {
     internal class MRPServer
     {
-        private readonly IAPI api;
         private readonly HttpListener listener = new HttpListener();
-        private readonly RoutingNode routes;
+        private readonly RoutingNode rootRoute;
         private readonly string url;
 
         internal MRPServer(IAPI api)
         {
-            this.api = api;
             url = "http://localhost:8080/";
             listener.Prefixes.Add(url);
 
-            routes = new RoutingNode(null, new Dictionary<string, RoutingNode>
+            rootRoute = new RoutingNode(null, new Dictionary<string, RoutingNode>
             {
                 ["users"] = new RoutingNode(null, new Dictionary<string, RoutingNode>
                 {
@@ -97,7 +95,7 @@ namespace mrp
                 }),
                 ["leaderboard"] = new RoutingNode(new Dictionary<string, Action<HttpListenerContext, Dictionary<string, string>>>
                 {
-                    ["GET"] = (ctx, parameters) => api.UserHandler.GetLeaderboard(ctx, parameters),
+                    ["GET"] = (ctx, parameters) => api.UserHandler.GetLeaderboard(ctx),
                 }, null)
             });
         }
@@ -127,7 +125,7 @@ namespace mrp
             string[] paths = (requestContext.Request.Url?.AbsolutePath ?? "").Split('/');
 
             Dictionary<string,string> parameters=new Dictionary<string, string>();
-            var currentRoute = routes;
+            var currentRoute = rootRoute;
             foreach (string path in paths.Skip(1))
             {
                 var (routeNode, parameter) = currentRoute.NextRoute(path);

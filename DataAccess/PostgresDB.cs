@@ -3,12 +3,11 @@ namespace DataAccess
 {
     public class PostgresDB
     {
-        private static string connectionString = "Host=localhost;Port=5432;Username=postgres;Password=1234;Database=mrp_db;";
         private NpgsqlDataSource _dataSource;
         private PostgresDB(NpgsqlDataSource dataSource) {
             _dataSource = dataSource;
         }
-        public static PostgresDB Initialize()   {
+        public static PostgresDB Initialize(string connectionString)   {
             var dataSource = NpgsqlDataSource.Create(connectionString);
 
             return new PostgresDB(dataSource);

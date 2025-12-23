@@ -1,6 +1,6 @@
 ﻿using BusinessLogic.Models;
 
-namespace BusinessLogic.BusinessLogic
+namespace BusinessLogic
 {
     public interface IRecommendationService
     {

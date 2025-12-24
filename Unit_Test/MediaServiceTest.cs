@@ -24,7 +24,7 @@ namespace Unit_Test
             int existingId = 1;
             var result = await _mediaService.FindMediaById(existingId);
             Assert.That(result.Value != null);
-            Assert.That(result.Value.Id == existingId);
+            Assert.That(result.Value != null && result.Value.Id == existingId);
             Assert.That(result.Response.ResponseCode == BL_Response.OK);
         }
         [Test]
@@ -74,8 +74,8 @@ namespace Unit_Test
         {
             var result = await _mediaService.GetMedia(null);
             Assert.That(result.Value != null);
-            Assert.That(result.Value.Count == 1);
-            Assert.That(result.Value.First().Id == 1);
+            Assert.That(result.Value != null && result.Value.Count == 1);
+            Assert.That(result.Value != null && result.Value.First().Id == 1);
             Assert.That(result.Response.ResponseCode == BL_Response.OK);
         }
         [Test]
@@ -84,8 +84,8 @@ namespace Unit_Test
             MediaFilter filter = new MediaFilter("Test", null, 2000, "comedy", 0, 0, null);
             var result = await _mediaService.GetMedia(null);
             Assert.That(result.Value != null);
-            Assert.That(result.Value.Count == 1);
-            Assert.That(result.Value.First().Id == 1);
+            Assert.That(result.Value != null && result.Value.Count == 1);
+            Assert.That(result.Value != null && result.Value.First().Id == 1);
             Assert.That(result.Response.ResponseCode == BL_Response.OK);
         }
         [Test]

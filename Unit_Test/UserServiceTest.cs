@@ -22,7 +22,7 @@ namespace Unit_Test
             string existingUsername = "TestUser";
             var result = await _userService.FindUserByName(existingUsername);
             Assert.That(result.Value != null);
-            Assert.That(result.Value.Username == existingUsername);
+            Assert.That(result.Value != null && result.Value.Username == existingUsername);
             Assert.That(result.Response.ResponseCode == BL_Response.OK);
         }
 

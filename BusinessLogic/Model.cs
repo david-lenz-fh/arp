@@ -8,7 +8,7 @@ namespace BusinessLogic.Models
 {
     public record User(string Username, string Password, string? Email, string? FavouriteGenre);
     public record Profile(string? Email, string? FavouriteGenre);
-    public record Media(int Id, string? Title, string? Description, DateOnly? ReleaseDate, int? Fsk, List<string> Genres, string MediaType, decimal? AverageStars, User Creator);
+    public record Media(int Id, string? Title, string? Description, DateOnly? ReleaseDate, int? Fsk, List<string> Genres, string? MediaType, decimal? AverageStars, User Creator);
     public record PostMedia(string Title, string? Description, DateOnly? ReleaseDate, int? Fsk, List<string> Genres, string? MediaType);
     public record PutMedia(int Id, string? Title, string? Description, DateOnly? ReleaseDate, int? Fsk, List<string>? Genres, string? MediaType);
     public record Login(string Username, string Password);

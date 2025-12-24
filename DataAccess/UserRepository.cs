@@ -20,7 +20,7 @@ namespace DataAccess
             {
                 ["username"] = username
             };
-            var reader = await _postgres.SQLWithReturns(sql, sqlParams);
+            await using var reader = await _postgres.SQLWithReturns(sql, sqlParams);
             if (reader == null || !await reader.ReadAsync())
             {
                 return null;
@@ -104,7 +104,7 @@ namespace DataAccess
                 ["top_x"] = topXusers
             };
 
-            var reader = await _postgres.SQLWithReturns(sql, sqlParams); 
+            await using var reader= await _postgres.SQLWithReturns(sql, sqlParams); 
             while (reader != null && await reader.ReadAsync())
             {
                 leaderboard.Add(new UserActivity(reader.GetString(0), reader.GetInt32(1)));

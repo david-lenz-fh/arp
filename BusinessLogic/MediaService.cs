@@ -93,7 +93,7 @@ namespace BusinessLogic
             var returnValue = await _dal.MediaRepo.AddMedia(addMedia);
             if (returnValue == null)
             {
-                return new Result<int?>(null, new ResultResponse(BL_Response.NotFound, "Resource not found"));
+                return new Result<int?>(null, new ResultResponse(BL_Response.InternalError, "Resource not created"));
             }
             await _dal.UserRepo.AddActivityPoints(user.Value.Username, 3);
             return new Result<int?>(returnValue, new ResultResponse(BL_Response.OK, "Media created"));

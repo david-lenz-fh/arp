@@ -16,7 +16,7 @@ namespace DataAccess
         {
             string sql = "SELECT rating_id, username, media_id, comment, stars, confirmed, timestamp FROM rating WHERE rating_id=@id";
             var sqlParams = new Dictionary<string, object?> { ["id"] = id };
-            var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
+            await using var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
             if (reader == null || !await reader.ReadAsync())
             {
                 return null;
@@ -47,7 +47,7 @@ namespace DataAccess
                 ["stars"] = added.Stars,
                 ["timestamp"] = DateTime.UtcNow
             };
-            var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
+            await using var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
             if (reader == null || !await reader.ReadAsync())
             {
                 return null;
@@ -126,7 +126,7 @@ namespace DataAccess
             {
                 ["username"] = username
             };
-            var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
+            await using var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
             while (reader != null && await reader.ReadAsync())
             {
                 int ratingId = reader.GetInt32(0);
@@ -151,7 +151,7 @@ namespace DataAccess
             {
                 ["username"] = username
             };
-            var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
+            await using var reader = await _postgres_db.SQLWithReturns(sql, sqlParams);
             while (reader!=null && await reader.ReadAsync())
             {
                 re.Add(new FavouriteEntity(username, reader.GetInt32(0)));

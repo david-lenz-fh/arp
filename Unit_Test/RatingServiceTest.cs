@@ -23,7 +23,7 @@ namespace Unit_Test
             int existingId = 0;
             var result = await _ratingService.FindRatingById(existingId);
             Assert.That(result.Value != null);
-            Assert.That(result.Value.Id == existingId);
+            Assert.That(result.Value != null && result.Value.Id == existingId);
             Assert.That(result.Response.ResponseCode == BL_Response.OK);
         }
 

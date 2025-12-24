@@ -85,7 +85,7 @@ namespace DataAccess
                 }
             }
             var re=new List<MediaEntity>();            
-            var reader = await _postgres.SQLWithReturns(sql.ToString(), sqlParams);
+            await using var reader = await _postgres.SQLWithReturns(sql.ToString(), sqlParams);
             while (reader != null && await reader.ReadAsync())
             {
                 string? title = reader.IsDBNull(1) ? null: reader.GetString(1);
@@ -121,7 +121,7 @@ namespace DataAccess
             {
                 ["media_id"] = id,
             };
-            var reader = await _postgres.SQLWithReturns(sql, sqlParams);
+            await using var reader = await _postgres.SQLWithReturns(sql, sqlParams);
             if (reader == null || !await reader.ReadAsync())
             {
                 return null;
@@ -141,7 +141,7 @@ namespace DataAccess
         {
             var re=new List<string>();
             String sql = "SELECT genre_name FROM genre";
-            var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { });
+            await using var reader = await _postgres.SQLWithReturns(sql, new Dictionary<string, object?> { });
             while (reader!=null&&await reader.ReadAsync())
             {
                 re.Add(reader.GetString(0));
@@ -171,7 +171,7 @@ namespace DataAccess
                 ["genres"] = media.GenreNames.ToArray(),
                 ["creatorName"] = media.CreatorName
             };
-            var reader = await _postgres.SQLWithReturns(sql, sqlParams);
+            await using var reader = await _postgres.SQLWithReturns(sql, sqlParams);
 
             if (reader==null||!await reader.ReadAsync())
             {

@@ -1,0 +1,755 @@
+{
+	"info": {
+		"_postman_id": "5de159f4-30b5-42fa-8496-10f1ec6cf5e9",
+		"name": "MRP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10340550"
+	},
+	"item": [
+		{
+			"name": "/users/register",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Username\":\"\",\r\n    \"Password\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/users/register",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/users/login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Username\":\"Lucy Path\",\r\n    \"Password\":\"ichLiebeC#\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/users/{userId}/profile",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "DqiIxGpbcP8hMDcB5WA6K9QhUyFkFSLe+0NqKYZKZ85VcUzaejXidhvGYfsIxvkq",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/user",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/users/{userId}/recommendations",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "DqiIxGpbcP8hMDcB5WA6K9QhUyFkFSLe+0NqKYZKZ85VcUzaejXidhvGYfsIxvkq",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/user",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/users/{userId}/profile",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "DqiIxGpbcP8hMDcB5WA6K9QhUyFkFSLe+0NqKYZKZ85VcUzaejXidhvGYfsIxvkq",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Email\":\"Ju.gen@gmx.com\",\r\n    \"FavouriteGenre\":\"drama\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/users/Jürgen/profile",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"Jürgen",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/users/{userId}/ratings",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/users/David/ratings",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"David",
+						"ratings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/users/{userId}/favorites",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/users/David/favorites",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"David",
+						"favorites"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/media",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/media?releaseYear=2024",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"media"
+					],
+					"query": [
+						{
+							"key": "rating",
+							"value": "2",
+							"description": "\n",
+							"disabled": true
+						},
+						{
+							"key": "sortBy",
+							"value": "title",
+							"disabled": true
+						},
+						{
+							"key": "title",
+							"value": "Naruto",
+							"disabled": true
+						},
+						{
+							"key": "ageRestriction",
+							"value": "10",
+							"disabled": true
+						},
+						{
+							"key": "mediaType",
+							"value": "Series",
+							"disabled": true
+						},
+						{
+							"key": "releaseYear",
+							"value": "2024"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/media",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Sword Art Online\",\r\n  \"description\": \"Kirito hat 2 schwerter\",\r\n  \"mediaType\": \"Series\",\r\n  \"releaseYear\": 2012,\r\n  \"genres\": [\r\n    \"drama\",\"comedy\"\r\n  ],\r\n  \"ageRestriction\": 12\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/media",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"media"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/media/{mediaId}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/media/3",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"media",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/media/{mediaId}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "I3plUc1Dg1xhZ4pfrZBNRIlSvoD/MzPgY9HEiok/20q9NxH8D9izhX7CAKp/lYei",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Fairy Tail\",\r\n  \"description\": \"natsu feuer\",\r\n  \"mediaType\": \"Series\",\r\n  \"releaseYear\": 2008,\r\n  \"genres\": [\r\n    \"Comedy\",\"Drama\"\r\n  ],\r\n  \"ageRestriction\": 8\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/media/2",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"media",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/media/{mediaId}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/media/4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"media",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/media/{mediaId}/rate",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BCRst1K86UhcZnhxVd3Ub0IL11Ropi3NehIqEwZO91sVrZ1+RklxSziIb4Qtz6v6",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"comment\":\"perfekt\",\r\n    \"stars\":5\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/media/4/rate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"media",
+						"4",
+						"rate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/media/{mediaId}/favorite",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "CbeG0HwLwLDfzWebfYlkvQ1psOXl7sXeZAsPVgiJNVuM8zHoA17Tq+YDUYKawXZ8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/media/4/favorite",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"media",
+						"4",
+						"favorite"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/media/{mediaId}/unfavorite",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BCRst1K86UhcZnhxVd3Ub0IL11Ropi3NehIqEwZO91sVrZ1+RklxSziIb4Qtz6v6",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/media/4/favorite",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"media",
+						"4",
+						"favorite"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/ratings/{ratingId}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BCRst1K86UhcZnhxVd3Ub0IL11Ropi3NehIqEwZO91sVrZ1+RklxSziIb4Qtz6v6",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ratings/4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ratings",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/ratings/{ratingId}/confirm",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BCRst1K86UhcZnhxVd3Ub0IL11Ropi3NehIqEwZO91sVrZ1+RklxSziIb4Qtz6v6",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ratings/4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ratings",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/ratings/{ratingId}/like",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BCRst1K86UhcZnhxVd3Ub0IL11Ropi3NehIqEwZO91sVrZ1+RklxSziIb4Qtz6v6",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ratings/11/like",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ratings",
+						"11",
+						"like"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/leaderboard",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "BCRst1K86UhcZnhxVd3Ub0IL11Ropi3NehIqEwZO91sVrZ1+RklxSziIb4Qtz6v6",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/leaderboard",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"leaderboard"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

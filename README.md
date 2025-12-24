@@ -1,12 +1,12 @@
 Hallo!
 
-Das ist meine Media Rating Platform. Zumindest bald. Hier ist mein Zwischenstand für die Zwischenabgabge.
+Das ist meine Media Rating Platform.
 
-Bevor das Projekt gebuilded wird, müssen die docker\_db\_setup.bat (direkt im root verzeichnis) asusgeführt werden.
+Bevor das Projekt gebuilded wird, müssen die docker\_db\_setup.bat (direkt im root verzeichnis) ausgeführt werden.
 Alternativ kann auch vom root Verzeichnis 'docker compose -f "./DataAccess/db/docker-compose.yml" up -d mrp\_db' ausgeführt werden.
 
 Github Link: https://github.com/david-lenz-fh/arp
-Postman Collection: Im root Verzeichnis "MRP.postman\_collection.json" (Bei der GET Methode muss der Token als Bearer Token übergeben werden)
+Postman Collection: Im root Verzeichnis "postman_collection.json"
 
 
 
@@ -17,7 +17,4 @@ sondern haben nur Interfaces des Layers.
 
 Beim Login hab ich mich entschieden meinen eigenen Token zu erstellen. Dies mach ich in dem ich mit einem geheimen Schlüssel den Usernamen sowie ein Gültigkeitsende symmetrisch verschlüssele. Passwörter werden nur gehashed (SHA256) in der Datenbank abgespeichert.
 
-Zum Routen hab ich ein Dictonary, dass mit der Route und der HTTP Methode als Schlüssel mit dem jeweiligen Task verbunden ist.
-
-Disclaimer: Es kann sein das manche Methoden im Repository noch nicht 100% korrekt sind. Das ist weil ich sie noch nicht gebraucht habe für Login/Registration.
-
+Zum Routen hab ich mich dazu entschieden es über einen Tree zu lösen.

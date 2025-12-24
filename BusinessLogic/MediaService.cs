@@ -85,6 +85,10 @@ namespace BusinessLogic
             {
                 return new Result<int?>(null, user.Response);
             }
+            if(postedMedia.MediaType!="Series" && postedMedia.MediaType != "Movie" && postedMedia.MediaType != "Game")
+            {
+                return new Result<int?>(null, new ResultResponse(BL_Response.BadParameters, "Media Type must be either of the following: Series, Game, Movie"));
+            }
             var addMedia = new AddMedia(postedMedia.Title, postedMedia.Description, postedMedia.ReleaseDate, postedMedia.Fsk, postedMedia.Genres, postedMedia.MediaType, user.Value.Username);
             var returnValue = await _dal.MediaRepo.AddMedia(addMedia);
             if (returnValue == null)

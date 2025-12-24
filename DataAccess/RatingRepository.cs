@@ -17,7 +17,7 @@ namespace DataAccess
             string sql = "SELECT rating_id, username, media_id, comment, stars, confirmed, timestamp FROM rating WHERE rating_id=@id";
             var sqlParams = new Dictionary<string, object?> { ["id"] = id };
             var reader=await _postgres_db.SQLWithReturns(sql, sqlParams);
-            if (reader == null || await reader.ReadAsync())
+            if (reader == null || !await reader.ReadAsync())
             {
                 return null;
             }

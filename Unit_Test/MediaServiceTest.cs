@@ -89,19 +89,37 @@ namespace Unit_Test
             Assert.That(result.Response.ResponseCode == BL_Response.OK);
         }
         [Test]
-        public async Task Add_A_Media_With_Valid_Token()
+        public async Task Add_A_Media_With_Valid_Token_And_Valid_Media()
         {
-            PostMedia media = new PostMedia("TestNewMedia", null, null, null, new List<string>(),null);
+            PostMedia media = new PostMedia("TestNewMedia", null, null, null, new List<string>(), "Series");
             string validToken = "token";
             var result = await _mediaService.PostMedia(validToken, media);
             Assert.That(result.Value != null);
             Assert.That(result.Response.ResponseCode == BL_Response.OK);
         }
         [Test]
-        public async Task Dont_Add_A_Media_With_Invalid_Token()
+        public async Task Dont_Add_A_Media_With_Valid_Token_But_Invalid_Media()
         {
-            PostMedia media = new PostMedia("TestNewMedia", null, null, null, new List<string>(), null);
+            PostMedia media = new PostMedia("TestNewMedia", null, null, null, new List<string>(), "Serises");
+            string validToken = "token";
+            var result = await _mediaService.PostMedia(validToken, media);
+            Assert.That(result.Value == null);
+            Assert.That(result.Response.ResponseCode == BL_Response.BadParameters);
+        }
+        [Test]
+        public async Task Dont_Add_A_Media_With_Invalid_Token_But_Valid_Media()
+        {
+            PostMedia media = new PostMedia("TestNewMedia", null, null, null, new List<string>(), "Movie");
             string invalidToken = "tokenasdasdhuof";
+            var result = await _mediaService.PostMedia(invalidToken, media);
+            Assert.That(result.Value == null);
+            Assert.That(result.Response.ResponseCode == BL_Response.AuthenticationFailed);
+        }
+        [Test]
+        public async Task Dont_Add_A_Media_With_Invalid_Token_And_Invalid_Media()
+        {
+            PostMedia media = new PostMedia("TestNewMedia", null, null, null, new List<string>(), "Serises");
+            string invalidToken = "tosken";
             var result = await _mediaService.PostMedia(invalidToken, media);
             Assert.That(result.Value == null);
             Assert.That(result.Response.ResponseCode == BL_Response.AuthenticationFailed);

@@ -14,7 +14,7 @@ namespace API
     public record FavouriteDTO(string Username, FavouriteMediaDTO Media);
     public record FavouriteMediaDTO(int Id, string? Title, DateOnly? ReleaseDate, string? MediaType);
     public record ProfileDTO(string? Email, string? FavouriteGenre);
-    public record PostMediaDTO(string Title, string? Description, int? ReleaseYear, List<string>? Genres, int? AgeRestriction, string? MediaType);
+    public record PostMediaDTO(string Title, string? Description, int? ReleaseYear, List<string>? Genres, int? AgeRestriction, string MediaType);
     public record UserRankDTO(int Placement, int Score, string Username);
     public record RecommendationDTO(MediaDTO media, decimal score);
 }
